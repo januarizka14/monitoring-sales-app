@@ -33,17 +33,19 @@ Aplikasi mobile berbasis **Flutter** untuk memantau aktivitas sales di lapangan,
 ---
 
 ## 📁 Struktur Project
+
+<pre>
 monitoring_sales_app/
 ├── lib/
 │   ├── screens/
 │   │   ├── login_screen.dart
 │   │   ├── daftar_screen.dart
-│   │   ├── main_navigation.dart        # Navigasi Sales
+│   │   ├── main_navigation.dart
 │   │   ├── dashboard_tab.dart
 │   │   ├── bengkel_tab.dart
 │   │   ├── riwayat_tab.dart
 │   │   ├── task_tab.dart
-│   │   ├── admin_navigation.dart       # Navigasi Admin
+│   │   ├── admin_navigation.dart
 │   │   ├── admin_dashboard_tab.dart
 │   │   ├── admin_tugas_tab.dart
 │   │   ├── admin_kunjungan_tab.dart
@@ -70,8 +72,9 @@ monitoring_sales_app/
 │       ├── ambil_semua_users.php
 │       └── hapus_user.php
 ├── database/
-│   └── db_sales_bengkel.sql            # Export database
+│   └── db_sales_bengkel.sql
 └── README.md
+</pre>
 
 ---
 
