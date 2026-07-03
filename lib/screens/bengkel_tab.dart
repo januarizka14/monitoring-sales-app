@@ -183,15 +183,15 @@ class BengkelTabState extends State<BengkelTab> {
                   children: [
                     TextFormField(
                       controller: _namaBengkelController,
-                      decoration: _inputDecor(
-                              'Nama Bengkel *', Icons.storefront_rounded)
-                          .copyWith(hintText: 'Masukkan nama bengkel'),
+                      decoration:
+                          _inputDecor('Nama Bengkel', Icons.storefront_rounded)
+                              .copyWith(hintText: 'Masukkan nama bengkel'),
                       validator: (v) =>
                           v!.isEmpty ? 'Nama bengkel wajib diisi' : null,
                     ),
                     const SizedBox(height: 18),
                     const Text(
-                      'Status Kunjungan *',
+                      'Status Kunjungan',
                       style: TextStyle(
                         fontWeight: FontWeight.w600,
                         fontSize: 13,
