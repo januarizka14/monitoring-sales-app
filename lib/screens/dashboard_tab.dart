@@ -20,13 +20,18 @@ class DashboardTabState extends State<DashboardTab> {
   static const Color accentRed = Color(0xFFDB1607);
 
   late Future<Map<String, dynamic>> _dashboardData;
+  Map<String, dynamic>? _dashboardDataCache;
   late Future<Map<String, dynamic>> _tasksFuture;
   Map<String, dynamic>? _taskData;
 
   @override
   void initState() {
     super.initState();
-    _dashboardData = DataService().ambilDataDashboard(widget.usernameSales);
+    _dashboardData =
+        DataService().ambilDataDashboard(widget.usernameSales).then((data) {
+      _dashboardDataCache = data;
+      return data;
+    });
     _loadTasks();
   }
 
@@ -48,13 +53,15 @@ class DashboardTabState extends State<DashboardTab> {
 
   // TIDAK DIUBAH — dipanggil dari MainNavigation via GlobalKey
   Future<void> refreshDashboard() async {
-    final newData =
-        await DataService().ambilDataDashboard(widget.usernameSales);
-    if (mounted) {
-      setState(() {
-        _dashboardData = Future.value(newData);
-      });
-    }
+    _dashboardData =
+        DataService().ambilDataDashboard(widget.usernameSales).then((data) {
+      if (mounted) {
+        setState(() {
+          _dashboardDataCache = data;
+        });
+      }
+      return data;
+    });
     await _loadTasks();
   }
 
@@ -97,11 +104,12 @@ class DashboardTabState extends State<DashboardTab> {
         child: FutureBuilder<Map<String, dynamic>>(
           future: _dashboardData,
           builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
+            if (snapshot.connectionState == ConnectionState.waiting &&
+                _dashboardDataCache == null) {
               return const Center(
                   child: CircularProgressIndicator(color: primaryBlue));
             }
-            final data = snapshot.data ?? {};
+            final data = snapshot.data ?? _dashboardDataCache ?? {};
 
             return SingleChildScrollView(
               physics: const AlwaysScrollableScrollPhysics(),
