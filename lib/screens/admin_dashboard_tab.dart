@@ -78,9 +78,13 @@ class AdminDashboardTabState extends State<AdminDashboardTab> {
                   Container(
                     width: double.infinity,
                     padding: EdgeInsets.fromLTRB(
-                        24, MediaQuery.of(context).padding.top + 16, 24, 24),
+                        24, MediaQuery.of(context).padding.top + 18, 24, 24),
                     decoration: const BoxDecoration(
-                      color: primaryBlue,
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [Color(0xFF003A8F), Color(0xFF004AAD)],
+                      ),
                       borderRadius: BorderRadius.only(
                         bottomLeft: Radius.circular(28),
                         bottomRight: Radius.circular(28),
@@ -248,11 +252,21 @@ class AdminDashboardTabState extends State<AdminDashboardTab> {
   Widget _buildStatCard(String label, String value, IconData icon) {
     return Expanded(
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.15),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.white.withOpacity(0.3)),
+          gradient: const LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Color(0xFF0052C7), Color(0xFF004AAD)],
+          ),
+          borderRadius: BorderRadius.circular(18),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.08),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -265,8 +279,8 @@ class AdminDashboardTabState extends State<AdminDashboardTab> {
                     fontSize: 22,
                     fontWeight: FontWeight.w800)),
             Text(label,
-                style: TextStyle(
-                    color: Colors.white.withOpacity(0.85),
+                style: const TextStyle(
+                    color: Colors.white70,
                     fontSize: 11,
                     fontWeight: FontWeight.w500)),
           ],

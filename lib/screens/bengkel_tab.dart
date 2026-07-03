@@ -183,14 +183,15 @@ class BengkelTabState extends State<BengkelTab> {
                   children: [
                     TextFormField(
                       controller: _namaBengkelController,
-                      decoration:
-                          _inputDecor('Nama Bengkel', Icons.storefront_rounded),
+                      decoration: _inputDecor(
+                              'Nama Bengkel *', Icons.storefront_rounded)
+                          .copyWith(hintText: 'Masukkan nama bengkel'),
                       validator: (v) =>
                           v!.isEmpty ? 'Nama bengkel wajib diisi' : null,
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 18),
                     const Text(
-                      'Status Kunjungan',
+                      'Status Kunjungan *',
                       style: TextStyle(
                         fontWeight: FontWeight.w600,
                         fontSize: 13,
@@ -204,30 +205,25 @@ class BengkelTabState extends State<BengkelTab> {
                       children: _statusList.map((status) {
                         final isSelected = _selectedStatus == status;
                         final color = _chipColor(status);
-                        return GestureDetector(
-                          onTap: () => setState(() => _selectedStatus = status),
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 200),
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 8),
-                            decoration: BoxDecoration(
-                              color:
-                                  isSelected ? color : color.withOpacity(0.08),
-                              borderRadius: BorderRadius.circular(20),
-                              border: Border.all(
-                                color:
-                                    isSelected ? color : color.withOpacity(0.3),
-                              ),
-                            ),
-                            child: Text(
-                              status,
-                              style: TextStyle(
-                                color: isSelected ? Colors.white : color,
-                                fontWeight: FontWeight.w600,
-                                fontSize: 13,
-                              ),
+                        return ChoiceChip(
+                          label: Text(
+                            status,
+                            style: TextStyle(
+                              color: isSelected ? Colors.white : color,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
+                          selected: isSelected,
+                          selectedColor: color,
+                          backgroundColor: color.withOpacity(0.12),
+                          disabledColor: color.withOpacity(0.12),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 14, vertical: 10),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          onSelected: (_) =>
+                              setState(() => _selectedStatus = status),
                         );
                       }).toList(),
                     ),
@@ -383,24 +379,26 @@ class BengkelTabState extends State<BengkelTab> {
 
   InputDecoration _inputDecor(String label, IconData icon) => InputDecoration(
         labelText: label,
-        labelStyle: const TextStyle(fontSize: 14, color: Colors.black45),
+        labelStyle: const TextStyle(fontSize: 14, color: Colors.black54),
         prefixIcon: Icon(icon, size: 20, color: primaryBlue),
         filled: true,
-        fillColor: const Color(0xFFF5F8FF),
+        fillColor: const Color(0xFFF4F8FF),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(14),
           borderSide: BorderSide.none,
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(14),
           borderSide: const BorderSide(color: primaryBlue, width: 1.5),
         ),
         errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(14),
           borderSide: const BorderSide(color: accentRed, width: 1.5),
         ),
         focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(14),
           borderSide: const BorderSide(color: accentRed, width: 1.5),
         ),
       );

@@ -180,174 +180,202 @@ class _AdminKunjunganTabState extends State<AdminKunjunganTab> {
                     ),
                   ),
                   const SizedBox(width: 10),
-                  const Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Monitoring Kunjungan',
-                          style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w800,
-                              color: Colors.black87)),
-                      Text('Seluruh kunjungan semua sales',
-                          style:
-                              TextStyle(fontSize: 12, color: Colors.black45)),
-                    ],
+                  const Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Monitoring Kunjungan',
+                            style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w800,
+                                color: Colors.black87)),
+                        Text('Seluruh kunjungan semua sales',
+                            style:
+                                TextStyle(fontSize: 12, color: Colors.black45)),
+                      ],
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: _loadData,
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: primaryBlue.withOpacity(0.08),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Icon(Icons.refresh_rounded,
+                          color: primaryBlue, size: 20),
+                    ),
                   ),
                 ],
               ),
             ),
-
-            // Search
+            const SizedBox(height: 10),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: TextField(
-                controller: _searchController,
-                onChanged: (val) {
-                  setState(() => _searchQuery = val.trim());
-                  Future.delayed(const Duration(milliseconds: 500), () {
-                    if (_searchQuery == val.trim()) _loadData();
-                  });
-                },
-                decoration: InputDecoration(
-                  hintText: 'Cari nama bengkel...',
-                  hintStyle:
-                      const TextStyle(fontSize: 13, color: Colors.black38),
-                  prefixIcon:
-                      const Icon(Icons.search_rounded, color: primaryBlue),
-                  filled: true,
-                  fillColor: Colors.white,
-                  contentPadding: const EdgeInsets.symmetric(vertical: 12),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
-                  ),
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.04),
+                      blurRadius: 12,
+                      offset: const Offset(0, 6),
+                    ),
+                  ],
                 ),
-              ),
-            ),
-
-            const SizedBox(height: 10),
-
-            // Filter status
-            SizedBox(
-              height: 36,
-              child: ListView.separated(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                scrollDirection: Axis.horizontal,
-                itemCount: _statusList.length,
-                separatorBuilder: (_, __) => const SizedBox(width: 8),
-                itemBuilder: (context, i) {
-                  final s = _statusList[i];
-                  final isSelected = _selectedStatus == s ||
-                      (s == 'Semua' && _selectedStatus.isEmpty);
-                  final color = s == 'Semua'
-                      ? primaryBlue
-                      : _statusColor(s.toLowerCase());
-
-                  return GestureDetector(
-                    onTap: () {
-                      setState(() => _selectedStatus = s == 'Semua' ? '' : s);
-                      _loadData();
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 14, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: isSelected ? color : Colors.white,
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(
-                          color: isSelected ? color : color.withOpacity(0.3),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    TextField(
+                      controller: _searchController,
+                      onChanged: (val) {
+                        setState(() => _searchQuery = val.trim());
+                        Future.delayed(const Duration(milliseconds: 500), () {
+                          if (_searchQuery == val.trim()) _loadData();
+                        });
+                      },
+                      decoration: InputDecoration(
+                        hintText: 'Cari nama bengkel...',
+                        hintStyle: const TextStyle(
+                            fontSize: 13, color: Colors.black38),
+                        prefixIcon: const Icon(Icons.search_rounded,
+                            color: primaryBlue),
+                        filled: true,
+                        fillColor: const Color(0xFFEFF4FF),
+                        contentPadding:
+                            const EdgeInsets.symmetric(vertical: 14),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(14),
+                          borderSide: BorderSide.none,
                         ),
-                      ),
-                      child: Text(
-                        s,
-                        style: TextStyle(
-                          color: isSelected ? Colors.white : color,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(14),
+                          borderSide:
+                              const BorderSide(color: primaryBlue, width: 1.5),
                         ),
                       ),
                     ),
-                  );
-                },
-              ),
-            ),
-
-            const SizedBox(height: 10),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Text('Filter Sales',
-                  style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black54)),
-            ),
-            const SizedBox(height: 8),
-            SizedBox(
-              height: 36,
-              child: _isLoadingSales
-                  ? const Center(
-                      child: SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      ),
-                    )
-                  : ListView.separated(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      scrollDirection: Axis.horizontal,
-                      itemCount: _salesList.length,
-                      separatorBuilder: (_, __) => const SizedBox(width: 8),
-                      itemBuilder: (context, i) {
-                        final s = _salesList[i];
-                        final isSelected = _selectedSales == s ||
-                            (s == 'Semua' && _selectedSales.isEmpty);
-                        final color =
-                            isSelected ? primaryBlue : Colors.grey.shade300;
-
-                        return GestureDetector(
-                          onTap: () {
-                            setState(
-                                () => _selectedSales = s == 'Semua' ? '' : s);
-                            _loadData();
-                          },
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Expanded(
                           child: Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 14, vertical: 6),
+                            padding: const EdgeInsets.symmetric(horizontal: 14),
                             decoration: BoxDecoration(
-                              color: isSelected ? primaryBlue : Colors.white,
-                              borderRadius: BorderRadius.circular(20),
-                              border: Border.all(
-                                color: isSelected
-                                    ? primaryBlue
-                                    : Colors.grey.shade300,
-                              ),
+                              color: const Color(0xFFF5F8FF),
+                              borderRadius: BorderRadius.circular(12),
                             ),
-                            child: Text(
-                              s,
-                              style: TextStyle(
-                                color:
-                                    isSelected ? Colors.white : Colors.black87,
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
+                            child: DropdownButtonHideUnderline(
+                              child: DropdownButton<String>(
+                                value: _selectedStatus.isEmpty
+                                    ? 'Semua'
+                                    : _selectedStatus,
+                                isExpanded: true,
+                                items: _statusList.map((s) {
+                                  final color = s == 'Semua'
+                                      ? Colors.black
+                                      : _statusColor(s.toLowerCase());
+                                  return DropdownMenuItem<String>(
+                                    value: s,
+                                    child: Text(
+                                      s,
+                                      style: TextStyle(color: color),
+                                    ),
+                                  );
+                                }).toList(),
+                                onChanged: (val) {
+                                  if (val == null) return;
+                                  setState(() => _selectedStatus =
+                                      val == 'Semua' ? '' : val);
+                                  _loadData();
+                                },
+                                icon: const Icon(
+                                    Icons.keyboard_arrow_down_rounded,
+                                    color: primaryBlue),
                               ),
                             ),
                           ),
-                        );
-                      },
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 14),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF5F8FF),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: _isLoadingSales
+                                ? const Padding(
+                                    padding: EdgeInsets.symmetric(vertical: 16),
+                                    child: Center(
+                                      child: SizedBox(
+                                        width: 18,
+                                        height: 18,
+                                        child: CircularProgressIndicator(
+                                            strokeWidth: 2),
+                                      ),
+                                    ),
+                                  )
+                                : DropdownButtonHideUnderline(
+                                    child: DropdownButton<String>(
+                                      value: _selectedSales.isEmpty
+                                          ? 'Semua'
+                                          : _selectedSales,
+                                      isExpanded: true,
+                                      items: _salesList.map((s) {
+                                        return DropdownMenuItem<String>(
+                                          value: s,
+                                          child: Text(s),
+                                        );
+                                      }).toList(),
+                                      onChanged: (val) {
+                                        if (val == null) return;
+                                        setState(() => _selectedSales =
+                                            val == 'Semua' ? '' : val);
+                                        _loadData();
+                                      },
+                                      icon: const Icon(
+                                          Icons.keyboard_arrow_down_rounded,
+                                          color: primaryBlue),
+                                    ),
+                                  ),
+                          ),
+                        ),
+                      ],
                     ),
+                  ],
+                ),
+              ),
             ),
-
             const SizedBox(height: 12),
-
             Expanded(
               child: _isLoading
                   ? const Center(
                       child: CircularProgressIndicator(color: primaryBlue))
                   : _kunjungan.isEmpty
-                      ? const Center(
-                          child: Text('Tidak ada data kunjungan.',
-                              style: TextStyle(
-                                  color: Colors.black45, fontSize: 15)),
+                      ? Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(20),
+                                decoration: BoxDecoration(
+                                  color: primaryBlue.withOpacity(0.1),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(Icons.search_off_rounded,
+                                    size: 48, color: primaryBlue),
+                              ),
+                              const SizedBox(height: 16),
+                              const Text('Tidak ada data kunjungan.',
+                                  style: TextStyle(
+                                      color: Colors.black45, fontSize: 15)),
+                            ],
+                          ),
                         )
                       : RefreshIndicator(
                           onRefresh: _loadData,
@@ -374,6 +402,7 @@ class _AdminKunjunganTabState extends State<AdminKunjunganTab> {
 
                               return Container(
                                 margin: const EdgeInsets.only(bottom: 12),
+                                padding: const EdgeInsets.all(16),
                                 decoration: BoxDecoration(
                                   color: Colors.white,
                                   borderRadius: BorderRadius.circular(16),
@@ -387,95 +416,111 @@ class _AdminKunjunganTabState extends State<AdminKunjunganTab> {
                                     ),
                                   ],
                                 ),
-                                child: Row(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Container(
-                                      width: 4,
-                                      height: 95,
-                                      decoration: BoxDecoration(
-                                        color: statusColor,
-                                        borderRadius: const BorderRadius.only(
-                                          topLeft: Radius.circular(16),
-                                          bottomLeft: Radius.circular(16),
+                                    Row(
+                                      children: [
+                                        Container(
+                                          padding: const EdgeInsets.all(10),
+                                          decoration: BoxDecoration(
+                                            color: statusColor.withOpacity(0.1),
+                                            borderRadius:
+                                                BorderRadius.circular(12),
+                                          ),
+                                          child: Icon(_statusIcon(status),
+                                              color: statusColor, size: 22),
                                         ),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 14),
-                                    Container(
-                                      padding: const EdgeInsets.all(10),
-                                      decoration: BoxDecoration(
-                                        color: statusColor.withOpacity(0.1),
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                      child: Icon(_statusIcon(status),
-                                          color: statusColor, size: 22),
-                                    ),
-                                    const SizedBox(width: 14),
-                                    Expanded(
-                                      child: Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                            vertical: 14),
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              item['nama_bengkel'] ?? '-',
-                                              style: const TextStyle(
-                                                  fontWeight: FontWeight.w700,
-                                                  fontSize: 15,
-                                                  color: Colors.black87),
-                                            ),
-                                            const SizedBox(height: 3),
-                                            Row(
-                                              children: [
-                                                const Icon(Icons.person_rounded,
-                                                    size: 11,
-                                                    color: primaryBlue),
-                                                const SizedBox(width: 3),
-                                                Text(
-                                                  item['nama_sales'] ?? '-',
-                                                  style: const TextStyle(
-                                                      fontSize: 11,
-                                                      color: primaryBlue,
-                                                      fontWeight:
-                                                          FontWeight.w600),
-                                                ),
-                                              ],
-                                            ),
-                                            const SizedBox(height: 5),
-                                            Container(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                      horizontal: 8,
-                                                      vertical: 3),
-                                              decoration: BoxDecoration(
-                                                color: statusColor
-                                                    .withOpacity(0.1),
-                                                borderRadius:
-                                                    BorderRadius.circular(20),
-                                              ),
-                                              child: Text(
-                                                status ?? '-',
-                                                style: TextStyle(
-                                                  color: statusColor,
-                                                  fontSize: 11,
-                                                  fontWeight: FontWeight.w600,
-                                                ),
-                                              ),
-                                            ),
-                                            const SizedBox(height: 4),
-                                            Text(
-                                              item['waktu_input'] ?? '-',
-                                              style: const TextStyle(
-                                                  fontSize: 11,
-                                                  color: Colors.black38),
-                                            ),
-                                          ],
+                                        const SizedBox(width: 14),
+                                        Expanded(
+                                          child: Text(
+                                            item['nama_bengkel'] ?? '-',
+                                            style: const TextStyle(
+                                                fontWeight: FontWeight.w700,
+                                                fontSize: 15,
+                                                color: Colors.black87),
+                                          ),
                                         ),
-                                      ),
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 10, vertical: 4),
+                                          decoration: BoxDecoration(
+                                            color:
+                                                statusColor.withOpacity(0.15),
+                                            borderRadius:
+                                                BorderRadius.circular(20),
+                                          ),
+                                          child: Text(
+                                            status ?? '-',
+                                            style: TextStyle(
+                                              color: statusColor,
+                                              fontSize: 11,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                    const SizedBox(width: 12),
+                                    const SizedBox(height: 12),
+                                    Wrap(
+                                      spacing: 10,
+                                      runSpacing: 8,
+                                      children: [
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 10, vertical: 6),
+                                          decoration: BoxDecoration(
+                                            color:
+                                                primaryBlue.withOpacity(0.08),
+                                            borderRadius:
+                                                BorderRadius.circular(14),
+                                          ),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              const Icon(Icons.person_rounded,
+                                                  size: 14, color: primaryBlue),
+                                              const SizedBox(width: 6),
+                                              Text(
+                                                item['nama_sales'] ?? '-',
+                                                style: const TextStyle(
+                                                    fontSize: 12,
+                                                    color: primaryBlue,
+                                                    fontWeight:
+                                                        FontWeight.w600),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 10, vertical: 6),
+                                          decoration: BoxDecoration(
+                                            color: Colors.grey.shade100,
+                                            borderRadius:
+                                                BorderRadius.circular(14),
+                                          ),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              const Icon(
+                                                  Icons.access_time_rounded,
+                                                  size: 14,
+                                                  color: Colors.black45),
+                                              const SizedBox(width: 6),
+                                              Text(
+                                                item['waktu_input'] ?? '-',
+                                                style: const TextStyle(
+                                                    fontSize: 12,
+                                                    color: Colors.black54,
+                                                    fontWeight:
+                                                        FontWeight.w600),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                                   ],
                                 ),
                               );

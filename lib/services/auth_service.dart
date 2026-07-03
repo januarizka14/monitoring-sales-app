@@ -26,7 +26,18 @@ class AuthService {
       'password': password,
     }).timeout(const Duration(seconds: 15));
 
-    return jsonDecode(response.body) as Map<String, dynamic>;
+    if (response.statusCode != 200) {
+      throw Exception('Server error: ${response.statusCode}');
+    }
+
+    try {
+      final decoded = jsonDecode(response.body);
+      if (decoded is Map<String, dynamic>) return decoded;
+      if (decoded is Map) return Map<String, dynamic>.from(decoded);
+      throw const FormatException('Respons server bukan JSON objek');
+    } catch (e) {
+      throw Exception('Respons server tidak valid: ${e.toString()}');
+    }
   }
 
   Future<Map<String, dynamic>> register({
@@ -39,6 +50,17 @@ class AuthService {
       'password': password,
     }).timeout(const Duration(seconds: 15));
 
-    return jsonDecode(response.body) as Map<String, dynamic>;
+    if (response.statusCode != 200) {
+      throw Exception('Server error: ${response.statusCode}');
+    }
+
+    try {
+      final decoded = jsonDecode(response.body);
+      if (decoded is Map<String, dynamic>) return decoded;
+      if (decoded is Map) return Map<String, dynamic>.from(decoded);
+      throw const FormatException('Respons server bukan JSON objek');
+    } catch (e) {
+      throw Exception('Respons server tidak valid: ${e.toString()}');
+    }
   }
 }

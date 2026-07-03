@@ -32,8 +32,23 @@ class _LoginScreenState extends State<LoginScreen> {
     final String username = _usernameController.text.trim();
     final String password = _passwordController.text.trim();
 
-    final result =
-        await authService.login(username: username, password: password);
+    Map<String, dynamic> result;
+    try {
+      result = await authService.login(username: username, password: password);
+    } catch (error) {
+      if (!mounted) return;
+      setState(() => _isSubmitting = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(error.toString()),
+          backgroundColor: accentRed,
+          behavior: SnackBarBehavior.floating,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+      );
+      return;
+    }
 
     if (!mounted) return;
     setState(() => _isSubmitting = false);
@@ -81,7 +96,7 @@ class _LoginScreenState extends State<LoginScreen> {
     final maxWidth = isSmallScreen ? 400.0 : 450.0;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF0F4F8),
+      backgroundColor: const Color(0xFFEFF4FF),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -104,13 +119,25 @@ class _LoginScreenState extends State<LoginScreen> {
                           color: primaryColor),
                     ),
                   ),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 18),
+                  Center(
+                    child: Text(
+                      'Aplikasi Monitoring Sales',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: primaryColor.withOpacity(0.95),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
 
                   // Kartu Form Login
                   Container(
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(24),
+                      border: Border.all(color: primaryColor.withOpacity(0.12)),
                       boxShadow: [
                         BoxShadow(
                           color: primaryColor.withOpacity(0.08),

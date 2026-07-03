@@ -18,6 +18,8 @@ class _AdminTugasTabState extends State<AdminTugasTab> {
   bool _isLoadingSales = false;
   String _filterStatus = '';
   String _selectedSales = '';
+  String _searchQuery = '';
+  final TextEditingController _searchController = TextEditingController();
   List<String> _salesList = ['Semua'];
 
   final List<String> _statusFilters = ['Semua', 'pending', 'done'];
@@ -27,6 +29,12 @@ class _AdminTugasTabState extends State<AdminTugasTab> {
     super.initState();
     _loadSales();
     _refreshTasks();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadSales() async {
@@ -55,6 +63,7 @@ class _AdminTugasTabState extends State<AdminTugasTab> {
       _tasksFuture = DataService().ambilSemuaTugas(
         status: _filterStatus,
         username: _selectedSales == 'Semua' ? '' : _selectedSales,
+        search: _searchQuery,
       );
     });
   }
@@ -131,19 +140,17 @@ class _AdminTugasTabState extends State<AdminTugasTab> {
       backgroundColor: Colors.transparent,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setModalState) {
-          // Load daftar sales sekali saat modal dibuka
           if (isLoadingUsers) {
             DataService().ambilSemuaUsers().then((result) {
-              if (result['status'] == 'success') {
-                setModalState(() {
-                  salesList = result['data_users'] ?? [];
-                  isLoadingUsers = false;
-                });
-              } else {
-                setModalState(() => isLoadingUsers = false);
-              }
+              if (!ctx.mounted) return;
+              setModalState(() {
+                salesList = result['status'] == 'success'
+                    ? result['data_users'] ?? []
+                    : [];
+                isLoadingUsers = false;
+              });
             });
-            isLoadingUsers = false; // cegah looping berkali-kali
+            isLoadingUsers = false;
           }
 
           return Padding(
@@ -176,59 +183,81 @@ class _AdminTugasTabState extends State<AdminTugasTab> {
                             fontSize: 18,
                             fontWeight: FontWeight.w800,
                             color: Colors.black87)),
+                    const SizedBox(height: 6),
+                    const Text(
+                      'Tambahkan tugas baru untuk sales dan pastikan semua informasi lengkap.',
+                      style: TextStyle(
+                          fontSize: 13, color: Colors.black54, height: 1.5),
+                    ),
                     const SizedBox(height: 20),
-
-                    // Dropdown pilih sales
+                    const Text('Sales',
+                        style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.black54)),
+                    const SizedBox(height: 8),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 14),
                       decoration: BoxDecoration(
                         color: const Color(0xFFF5F8FF),
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: salesList.isEmpty
+                      child: isLoadingUsers
                           ? const Padding(
                               padding: EdgeInsets.symmetric(vertical: 16),
-                              child: Text('Tidak ada data sales',
-                                  style: TextStyle(
-                                      color: Colors.black38, fontSize: 13)),
-                            )
-                          : DropdownButtonHideUnderline(
-                              child: DropdownButton<String>(
-                                value: selectedUsername,
-                                isExpanded: true,
-                                hint: const Row(
-                                  children: [
-                                    Icon(Icons.person_rounded,
-                                        color: primaryBlue, size: 20),
-                                    SizedBox(width: 10),
-                                    Text('Pilih Sales',
-                                        style: TextStyle(
-                                            color: Colors.black38,
-                                            fontSize: 14)),
-                                  ],
+                              child: Center(
+                                child: SizedBox(
+                                  width: 18,
+                                  height: 18,
+                                  child:
+                                      CircularProgressIndicator(strokeWidth: 2),
                                 ),
-                                items: salesList
-                                    .map<DropdownMenuItem<String>>((s) {
-                                  return DropdownMenuItem<String>(
-                                    value: s['username'],
-                                    child: Row(
+                              ),
+                            )
+                          : salesList.isEmpty
+                              ? const Padding(
+                                  padding: EdgeInsets.symmetric(vertical: 16),
+                                  child: Text('Tidak ada data sales',
+                                      style: TextStyle(
+                                          color: Colors.black38, fontSize: 13)),
+                                )
+                              : DropdownButtonHideUnderline(
+                                  child: DropdownButton<String>(
+                                    value: selectedUsername,
+                                    isExpanded: true,
+                                    hint: const Row(
                                       children: [
-                                        const Icon(Icons.person_rounded,
-                                            color: primaryBlue, size: 18),
-                                        const SizedBox(width: 10),
-                                        Text(s['username'] ?? '-'),
+                                        Icon(Icons.person_rounded,
+                                            color: primaryBlue, size: 20),
+                                        SizedBox(width: 10),
+                                        Text('Pilih Sales',
+                                            style: TextStyle(
+                                                color: Colors.black38,
+                                                fontSize: 14)),
                                       ],
                                     ),
-                                  );
-                                }).toList(),
-                                onChanged: (val) {
-                                  setModalState(() => selectedUsername = val);
-                                },
-                              ),
-                            ),
+                                    items: salesList
+                                        .map<DropdownMenuItem<String>>((s) {
+                                      return DropdownMenuItem<String>(
+                                        value: s['username'],
+                                        child: Row(
+                                          children: [
+                                            const Icon(Icons.person_rounded,
+                                                color: primaryBlue, size: 18),
+                                            const SizedBox(width: 10),
+                                            Text(s['username'] ?? '-'),
+                                          ],
+                                        ),
+                                      );
+                                    }).toList(),
+                                    onChanged: (val) {
+                                      setModalState(
+                                          () => selectedUsername = val);
+                                    },
+                                  ),
+                                ),
                     ),
-                    const SizedBox(height: 12),
-
+                    const SizedBox(height: 16),
                     TextField(
                       controller: namaBengkelController,
                       decoration: InputDecoration(
@@ -310,6 +339,7 @@ class _AdminTugasTabState extends State<AdminTugasTab> {
                                 if (selectedUsername == null ||
                                     namaBengkelController.text.trim().isEmpty ||
                                     deskripsiController.text.trim().isEmpty) {
+                                  if (!mounted) return;
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(
                                       content: Text('Lengkapi semua field!'),
@@ -333,6 +363,7 @@ class _AdminTugasTabState extends State<AdminTugasTab> {
 
                                 if (!ctx.mounted) return;
                                 Navigator.pop(ctx);
+                                if (!mounted) return;
 
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
@@ -406,133 +437,176 @@ class _AdminTugasTabState extends State<AdminTugasTab> {
                     ),
                   ),
                   const SizedBox(width: 10),
-                  const Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Manajemen Tugas',
-                          style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w800,
-                              color: Colors.black87)),
-                      Text('Kelola tugas seluruh sales',
-                          style:
-                              TextStyle(fontSize: 12, color: Colors.black45)),
-                    ],
+                  const Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Manajemen Tugas',
+                            style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w800,
+                                color: Colors.black87)),
+                        Text('Kelola tugas seluruh sales',
+                            style:
+                                TextStyle(fontSize: 12, color: Colors.black45)),
+                      ],
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: _refreshTasks,
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: primaryBlue.withOpacity(0.08),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Icon(Icons.refresh_rounded,
+                          color: primaryBlue, size: 20),
+                    ),
                   ),
                 ],
               ),
             ),
-
-            // Filter status
-            SizedBox(
-              height: 36,
-              child: ListView.separated(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                scrollDirection: Axis.horizontal,
-                itemCount: _statusFilters.length,
-                separatorBuilder: (_, __) => const SizedBox(width: 8),
-                itemBuilder: (context, i) {
-                  final s = _statusFilters[i];
-                  final isSelected = _filterStatus == s ||
-                      (s == 'Semua' && _filterStatus.isEmpty);
-                  return GestureDetector(
-                    onTap: () {
-                      setState(() => _filterStatus = s == 'Semua' ? '' : s);
-                      _refreshTasks();
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 14, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: isSelected ? primaryBlue : Colors.white,
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(
-                          color:
-                              isSelected ? primaryBlue : Colors.grey.shade300,
-                        ),
-                      ),
-                      child: Text(
-                        s == 'pending'
-                            ? 'Pending'
-                            : s == 'done'
-                                ? 'Selesai'
-                                : 'Semua',
-                        style: TextStyle(
-                          color: isSelected ? Colors.white : Colors.black54,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
-
             const SizedBox(height: 10),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Text('Filter Sales',
-                  style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black54)),
-            ),
-            const SizedBox(height: 8),
-            SizedBox(
-              height: 36,
-              child: _isLoadingSales
-                  ? const Center(
-                      child: SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: CircularProgressIndicator(strokeWidth: 2),
+              child: Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.04),
+                      blurRadius: 12,
+                      offset: const Offset(0, 6),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  children: [
+                    TextField(
+                      controller: _searchController,
+                      onChanged: (val) {
+                        setState(() => _searchQuery = val.trim());
+                        Future.delayed(const Duration(milliseconds: 300), () {
+                          if (_searchQuery == val.trim()) _refreshTasks();
+                        });
+                      },
+                      decoration: InputDecoration(
+                        hintText: 'Cari nama bengkel...',
+                        hintStyle: const TextStyle(
+                            fontSize: 13, color: Colors.black38),
+                        prefixIcon: const Icon(Icons.search_rounded,
+                            color: primaryBlue),
+                        filled: true,
+                        fillColor: const Color(0xFFEFF4FF),
+                        contentPadding:
+                            const EdgeInsets.symmetric(vertical: 14),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(14),
+                          borderSide: BorderSide.none,
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(14),
+                          borderSide:
+                              const BorderSide(color: primaryBlue, width: 1.5),
+                        ),
                       ),
-                    )
-                  : ListView.separated(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      scrollDirection: Axis.horizontal,
-                      itemCount: _salesList.length,
-                      separatorBuilder: (_, __) => const SizedBox(width: 8),
-                      itemBuilder: (context, i) {
-                        final s = _salesList[i];
-                        final isSelected = _selectedSales == s ||
-                            (s == 'Semua' && _selectedSales.isEmpty);
-                        return GestureDetector(
-                          onTap: () {
-                            setState(
-                                () => _selectedSales = s == 'Semua' ? '' : s);
-                            _refreshTasks();
-                          },
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Expanded(
                           child: Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 14, vertical: 6),
+                            padding: const EdgeInsets.symmetric(horizontal: 14),
                             decoration: BoxDecoration(
-                              color: isSelected ? primaryBlue : Colors.white,
-                              borderRadius: BorderRadius.circular(20),
-                              border: Border.all(
-                                color: isSelected
-                                    ? primaryBlue
-                                    : Colors.grey.shade300,
-                              ),
+                              color: const Color(0xFFF5F8FF),
+                              borderRadius: BorderRadius.circular(12),
                             ),
-                            child: Text(
-                              s,
-                              style: TextStyle(
-                                color:
-                                    isSelected ? Colors.white : Colors.black87,
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
+                            child: DropdownButtonHideUnderline(
+                              child: DropdownButton<String>(
+                                value: _filterStatus.isEmpty
+                                    ? 'Semua'
+                                    : _filterStatus,
+                                isExpanded: true,
+                                items: _statusFilters.map((s) {
+                                  return DropdownMenuItem<String>(
+                                    value: s,
+                                    child: Text(
+                                      s == 'pending'
+                                          ? 'Pending'
+                                          : s == 'done'
+                                              ? 'Selesai'
+                                              : 'Semua',
+                                    ),
+                                  );
+                                }).toList(),
+                                onChanged: (val) {
+                                  if (val == null) return;
+                                  setState(() => _filterStatus =
+                                      val == 'Semua' ? '' : val);
+                                  _refreshTasks();
+                                },
+                                icon: const Icon(
+                                    Icons.keyboard_arrow_down_rounded,
+                                    color: primaryBlue),
                               ),
                             ),
                           ),
-                        );
-                      },
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 14),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF5F8FF),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: _isLoadingSales
+                                ? const Padding(
+                                    padding: EdgeInsets.symmetric(vertical: 16),
+                                    child: Center(
+                                      child: SizedBox(
+                                        width: 18,
+                                        height: 18,
+                                        child: CircularProgressIndicator(
+                                            strokeWidth: 2),
+                                      ),
+                                    ),
+                                  )
+                                : DropdownButtonHideUnderline(
+                                    child: DropdownButton<String>(
+                                      value: _selectedSales.isEmpty
+                                          ? 'Semua'
+                                          : _selectedSales,
+                                      isExpanded: true,
+                                      items: _salesList.map((s) {
+                                        return DropdownMenuItem<String>(
+                                          value: s,
+                                          child: Text(s),
+                                        );
+                                      }).toList(),
+                                      onChanged: (val) {
+                                        if (val == null) return;
+                                        setState(() => _selectedSales =
+                                            val == 'Semua' ? '' : val);
+                                        _refreshTasks();
+                                      },
+                                      icon: const Icon(
+                                          Icons.keyboard_arrow_down_rounded,
+                                          color: primaryBlue),
+                                    ),
+                                  ),
+                          ),
+                        ),
+                      ],
                     ),
+                  ],
+                ),
+              ),
             ),
-
-            const SizedBox(height: 12),
-
+            const SizedBox(height: 14),
             Expanded(
               child: FutureBuilder<Map<String, dynamic>>(
                 future: _tasksFuture,
@@ -575,10 +649,14 @@ class _AdminTugasTabState extends State<AdminTugasTab> {
                       final task = tasks[i];
                       final status = task['status'] ?? 'pending';
                       final statusColor = _statusColor(status);
+                      final waktuInput =
+                          task['waktu_input']?.toString().trim() ?? '';
+                      final showWaktuInput = waktuInput.isNotEmpty;
 
                       return Container(
-                        margin: const EdgeInsets.only(bottom: 12),
-                        padding: const EdgeInsets.all(16),
+                        margin: const EdgeInsets.only(bottom: 10),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 10),
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(16),
@@ -591,112 +669,183 @@ class _AdminTugasTabState extends State<AdminTugasTab> {
                             ),
                           ],
                         ),
-                        child: Row(
+                        child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Container(
-                              padding: const EdgeInsets.all(10),
-                              decoration: BoxDecoration(
-                                color: statusColor.withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Icon(
-                                status == 'done'
-                                    ? Icons.check_circle_rounded
-                                    : Icons.assignment_rounded,
-                                color: statusColor,
-                                size: 22,
-                              ),
-                            ),
-                            const SizedBox(width: 14),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    color: statusColor.withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Icon(
+                                    status == 'done'
+                                        ? Icons.check_circle_rounded
+                                        : Icons.assignment_rounded,
+                                    color: statusColor,
+                                    size: 20,
+                                  ),
+                                ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
-                                      Expanded(
-                                        child: Text(
-                                          task['nama_bengkel'] ?? '-',
-                                          style: const TextStyle(
-                                              fontWeight: FontWeight.w700,
-                                              fontSize: 15,
-                                              color: Colors.black87),
-                                        ),
+                                      Text(
+                                        task['nama_bengkel'] ?? '-',
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(
+                                            fontWeight: FontWeight.w700,
+                                            fontSize: 14,
+                                            color: Colors.black87),
                                       ),
+                                      const SizedBox(height: 3),
+                                      Text(
+                                        task['deskripsi_tugas'] ?? '-',
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(
+                                            fontSize: 12,
+                                            color: Colors.black54,
+                                            height: 1.3),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                GestureDetector(
+                                  onTap: () => _konfirmasiHapus(
+                                      task['id'].toString(),
+                                      task['nama_bengkel'] ?? ''),
+                                  child: Container(
+                                    padding: const EdgeInsets.all(8),
+                                    decoration: BoxDecoration(
+                                      color: accentRed.withOpacity(0.08),
+                                      borderRadius: BorderRadius.circular(14),
+                                    ),
+                                    child: const Icon(
+                                      Icons.delete_outline_rounded,
+                                      color: accentRed,
+                                      size: 18,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Wrap(
+                                    spacing: 8,
+                                    runSpacing: 6,
+                                    children: [
                                       Container(
                                         padding: const EdgeInsets.symmetric(
-                                            horizontal: 8, vertical: 3),
+                                            horizontal: 10, vertical: 6),
                                         decoration: BoxDecoration(
-                                          color: statusColor.withOpacity(0.1),
+                                          color: primaryBlue.withOpacity(0.08),
                                           borderRadius:
-                                              BorderRadius.circular(20),
+                                              BorderRadius.circular(14),
                                         ),
-                                        child: Text(
-                                          status == 'done'
-                                              ? 'Selesai'
-                                              : 'Pending',
-                                          style: TextStyle(
-                                              color: statusColor,
-                                              fontSize: 10,
-                                              fontWeight: FontWeight.w600),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            const Icon(Icons.person_rounded,
+                                                size: 14, color: primaryBlue),
+                                            const SizedBox(width: 6),
+                                            Text(task['username'] ?? '-',
+                                                style: const TextStyle(
+                                                    fontSize: 12,
+                                                    color: primaryBlue,
+                                                    fontWeight:
+                                                        FontWeight.w600)),
+                                          ],
                                         ),
                                       ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Row(
-                                    children: [
-                                      const Icon(Icons.person_rounded,
-                                          size: 12, color: primaryBlue),
-                                      const SizedBox(width: 4),
-                                      Text(task['username'] ?? '-',
-                                          style: const TextStyle(
-                                              fontSize: 12,
-                                              color: primaryBlue,
-                                              fontWeight: FontWeight.w600)),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(task['deskripsi_tugas'] ?? '-',
-                                      style: const TextStyle(
-                                          fontSize: 13, color: Colors.black54)),
-                                  if (task['deadline'] != null &&
-                                      task['deadline']
-                                          .toString()
-                                          .isNotEmpty) ...[
-                                    const SizedBox(height: 6),
-                                    Row(
-                                      children: [
-                                        const Icon(Icons.calendar_today_rounded,
-                                            size: 11, color: accentRed),
-                                        const SizedBox(width: 4),
-                                        Text(
-                                          'Deadline: ${task['deadline']}',
-                                          style: const TextStyle(
-                                              fontSize: 11,
-                                              color: accentRed,
-                                              fontWeight: FontWeight.w600),
+                                      if (task['deadline'] != null &&
+                                          task['deadline']
+                                              .toString()
+                                              .isNotEmpty)
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 10, vertical: 6),
+                                          decoration: BoxDecoration(
+                                            color: accentRed.withOpacity(0.08),
+                                            borderRadius:
+                                                BorderRadius.circular(14),
+                                          ),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              const Icon(
+                                                  Icons.calendar_today_rounded,
+                                                  size: 14,
+                                                  color: accentRed),
+                                              const SizedBox(width: 6),
+                                              Text(
+                                                task['deadline'] ?? '-',
+                                                style: const TextStyle(
+                                                    fontSize: 12,
+                                                    color: accentRed,
+                                                    fontWeight:
+                                                        FontWeight.w600),
+                                              ),
+                                            ],
+                                          ),
                                         ),
-                                      ],
-                                    ),
-                                  ],
-                                ],
-                              ),
-                            ),
-                            GestureDetector(
-                              onTap: () => _konfirmasiHapus(
-                                  task['id'].toString(),
-                                  task['nama_bengkel'] ?? ''),
-                              child: Container(
-                                padding: const EdgeInsets.all(6),
-                                decoration: BoxDecoration(
-                                  color: accentRed.withOpacity(0.08),
-                                  borderRadius: BorderRadius.circular(10),
+                                      if (showWaktuInput)
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 10, vertical: 6),
+                                          decoration: BoxDecoration(
+                                            color: Colors.grey.shade100,
+                                            borderRadius:
+                                                BorderRadius.circular(14),
+                                          ),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              const Icon(
+                                                  Icons.access_time_rounded,
+                                                  size: 14,
+                                                  color: Colors.black45),
+                                              const SizedBox(width: 6),
+                                              Text(
+                                                waktuInput,
+                                                style: const TextStyle(
+                                                    fontSize: 12,
+                                                    color: Colors.black54,
+                                                    fontWeight:
+                                                        FontWeight.w600),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                    ],
+                                  ),
                                 ),
-                                child: const Icon(Icons.delete_outline_rounded,
-                                    color: accentRed, size: 22),
-                              ),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 10, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: statusColor.withOpacity(0.15),
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: Text(
+                                    status == 'done' ? 'Selesai' : 'Pending',
+                                    style: TextStyle(
+                                        color: statusColor,
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w700),
+                                  ),
+                                ),
+                              ],
                             ),
                           ],
                         ),

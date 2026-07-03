@@ -89,9 +89,10 @@ class DataService {
   Future<Map<String, dynamic>> ambilSemuaTugas({
     String status = '',
     String username = '',
+    String search = '',
   }) async {
     final Uri url = Uri.parse(
-        '$_baseUrl/ambil_semua_tugas.php?status=$status&username=$username');
+        '$_baseUrl/ambil_semua_tugas.php?status=${Uri.encodeComponent(status)}&username=${Uri.encodeComponent(username)}&search=${Uri.encodeComponent(search)}');
     final response = await http.get(url).timeout(const Duration(seconds: 15));
     return jsonDecode(response.body) as Map<String, dynamic>;
   }

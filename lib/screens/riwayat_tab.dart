@@ -249,216 +249,215 @@ class RiwayatTabState extends State<RiwayatTab> {
               ),
             ),
 
-            // Search bar
+            // Kartu search + filter
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: TextField(
-                controller: _searchController,
-                onChanged: (val) {
-                  setState(() => _searchQuery = val.trim());
-                  // Debounce ringan — load setelah berhenti ketik
-                  Future.delayed(const Duration(milliseconds: 500), () {
-                    if (_searchQuery == val.trim()) _loadData();
-                  });
-                },
-                decoration: InputDecoration(
-                  hintText: 'Cari nama bengkel...',
-                  hintStyle:
-                      const TextStyle(fontSize: 13, color: Colors.black38),
-                  prefixIcon:
-                      const Icon(Icons.search_rounded, color: primaryBlue),
-                  suffixIcon: _searchQuery.isNotEmpty
-                      ? IconButton(
-                          icon: const Icon(Icons.close_rounded,
-                              color: Colors.black38, size: 18),
-                          onPressed: () {
-                            _searchController.clear();
-                            setState(() => _searchQuery = '');
-                            _loadData();
-                          },
-                        )
-                      : null,
-                  filled: true,
-                  fillColor: Colors.white,
-                  contentPadding: const EdgeInsets.symmetric(vertical: 12),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide:
-                        const BorderSide(color: primaryBlue, width: 1.5),
-                  ),
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 10),
-
-            // Filter status chips
-            SizedBox(
-              height: 36,
-              child: ListView.separated(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                scrollDirection: Axis.horizontal,
-                itemCount: _statusList.length,
-                separatorBuilder: (_, __) => const SizedBox(width: 8),
-                itemBuilder: (context, i) {
-                  final s = _statusList[i];
-                  final isSelected = _selectedStatus == s ||
-                      (s == 'Semua' && _selectedStatus.isEmpty);
-                  final color = s == 'Semua'
-                      ? primaryBlue
-                      : _statusColor(s.toLowerCase());
-
-                  return GestureDetector(
-                    onTap: () {
-                      setState(() => _selectedStatus = s == 'Semua' ? '' : s);
-                      _loadData();
-                    },
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 200),
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 14, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: isSelected ? color : Colors.white,
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(
-                          color: isSelected ? color : color.withOpacity(0.3),
-                        ),
-                      ),
-                      child: Text(
-                        s,
-                        style: TextStyle(
-                          color: isSelected ? Colors.white : color,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
-
-            const SizedBox(height: 10),
-
-            // Filter tanggal
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Row(
-                children: [
-                  // Dari tanggal
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: () => _pilihTanggal(context, true),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 9),
-                        decoration: BoxDecoration(
-                          color: _dariTanggal != null
-                              ? primaryBlue.withOpacity(0.08)
-                              : Colors.white,
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(
-                            color: _dariTanggal != null
-                                ? primaryBlue.withOpacity(0.4)
-                                : Colors.grey.shade200,
-                          ),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(Icons.calendar_today_rounded,
-                                size: 14,
-                                color: _dariTanggal != null
-                                    ? primaryBlue
-                                    : Colors.black38),
-                            const SizedBox(width: 6),
-                            Text(
-                              _dariTanggal != null
-                                  ? _formatTanggal(_dariTanggal!)
-                                  : 'Dari tanggal',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: _dariTanggal != null
-                                    ? primaryBlue
-                                    : Colors.black38,
-                                fontWeight: _dariTanggal != null
-                                    ? FontWeight.w600
-                                    : FontWeight.normal,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  const Text('—', style: TextStyle(color: Colors.black38)),
-                  const SizedBox(width: 8),
-                  // Sampai tanggal
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: () => _pilihTanggal(context, false),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 9),
-                        decoration: BoxDecoration(
-                          color: _sampaiTanggal != null
-                              ? primaryBlue.withOpacity(0.08)
-                              : Colors.white,
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(
-                            color: _sampaiTanggal != null
-                                ? primaryBlue.withOpacity(0.4)
-                                : Colors.grey.shade200,
-                          ),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(Icons.calendar_today_rounded,
-                                size: 14,
-                                color: _sampaiTanggal != null
-                                    ? primaryBlue
-                                    : Colors.black38),
-                            const SizedBox(width: 6),
-                            Text(
-                              _sampaiTanggal != null
-                                  ? _formatTanggal(_sampaiTanggal!)
-                                  : 'Sampai tanggal',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: _sampaiTanggal != null
-                                    ? primaryBlue
-                                    : Colors.black38,
-                                fontWeight: _sampaiTanggal != null
-                                    ? FontWeight.w600
-                                    : FontWeight.normal,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  // Tombol reset filter — muncul hanya jika ada filter aktif
-                  if (_adaFilter) ...[
-                    const SizedBox(width: 8),
-                    GestureDetector(
-                      onTap: _resetFilter,
-                      child: Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: accentRed.withOpacity(0.08),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: const Icon(Icons.filter_alt_off_rounded,
-                            size: 18, color: accentRed),
-                      ),
+              child: Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.04),
+                      blurRadius: 10,
+                      offset: const Offset(0, 6),
                     ),
                   ],
-                ],
+                ),
+                child: Column(
+                  children: [
+                    TextField(
+                      controller: _searchController,
+                      onChanged: (val) {
+                        setState(() => _searchQuery = val.trim());
+                        Future.delayed(const Duration(milliseconds: 500), () {
+                          if (_searchQuery == val.trim()) _loadData();
+                        });
+                      },
+                      decoration: InputDecoration(
+                        hintText: 'Cari nama bengkel...',
+                        hintStyle: const TextStyle(
+                            fontSize: 13, color: Colors.black38),
+                        prefixIcon: const Icon(Icons.search_rounded,
+                            color: primaryBlue),
+                        suffixIcon: _searchQuery.isNotEmpty
+                            ? IconButton(
+                                icon: const Icon(Icons.close_rounded,
+                                    color: Colors.black38, size: 18),
+                                onPressed: () {
+                                  _searchController.clear();
+                                  setState(() => _searchQuery = '');
+                                  _loadData();
+                                },
+                              )
+                            : null,
+                        filled: true,
+                        fillColor: const Color(0xFFEFF4FF),
+                        contentPadding:
+                            const EdgeInsets.symmetric(vertical: 14),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(14),
+                          borderSide: BorderSide.none,
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(14),
+                          borderSide:
+                              const BorderSide(color: primaryBlue, width: 1.5),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 14, vertical: 12),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF5F8FF),
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                            child: DropdownButtonHideUnderline(
+                              child: DropdownButton<String>(
+                                value: _selectedStatus.isEmpty
+                                    ? 'Semua'
+                                    : _selectedStatus,
+                                isExpanded: true,
+                                items: _statusList.map((s) {
+                                  final color = s == 'Semua'
+                                      ? Colors.black
+                                      : _statusColor(s.toLowerCase());
+                                  return DropdownMenuItem<String>(
+                                    value: s,
+                                    child: Text(
+                                      s,
+                                      style: TextStyle(color: color),
+                                    ),
+                                  );
+                                }).toList(),
+                                onChanged: (val) {
+                                  if (val == null) return;
+                                  setState(() => _selectedStatus =
+                                      val == 'Semua' ? '' : val);
+                                  _loadData();
+                                },
+                                icon: const Icon(
+                                    Icons.keyboard_arrow_down_rounded,
+                                    color: primaryBlue),
+                              ),
+                            ),
+                          ),
+                        ),
+                        if (_adaFilter) ...[
+                          const SizedBox(width: 10),
+                          GestureDetector(
+                            onTap: _resetFilter,
+                            child: Container(
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                color: accentRed.withOpacity(0.08),
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                              child: const Icon(
+                                Icons.filter_alt_off_rounded,
+                                size: 18,
+                                color: accentRed,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: () => _pilihTanggal(context, true),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 12, vertical: 10),
+                              decoration: BoxDecoration(
+                                color: _dariTanggal != null
+                                    ? primaryBlue.withOpacity(0.08)
+                                    : const Color(0xFFF5F8FF),
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                              child: Row(
+                                children: [
+                                  Icon(Icons.calendar_today_rounded,
+                                      size: 14,
+                                      color: _dariTanggal != null
+                                          ? primaryBlue
+                                          : Colors.black38),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    _dariTanggal != null
+                                        ? _formatTanggal(_dariTanggal!)
+                                        : 'Dari tanggal',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: _dariTanggal != null
+                                          ? primaryBlue
+                                          : Colors.black38,
+                                      fontWeight: _dariTanggal != null
+                                          ? FontWeight.w600
+                                          : FontWeight.normal,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        const Text('—',
+                            style: TextStyle(color: Colors.black38)),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: () => _pilihTanggal(context, false),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 12, vertical: 10),
+                              decoration: BoxDecoration(
+                                color: _sampaiTanggal != null
+                                    ? primaryBlue.withOpacity(0.08)
+                                    : const Color(0xFFF5F8FF),
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                              child: Row(
+                                children: [
+                                  Icon(Icons.calendar_today_rounded,
+                                      size: 14,
+                                      color: _sampaiTanggal != null
+                                          ? primaryBlue
+                                          : Colors.black38),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    _sampaiTanggal != null
+                                        ? _formatTanggal(_sampaiTanggal!)
+                                        : 'Sampai tanggal',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: _sampaiTanggal != null
+                                          ? primaryBlue
+                                          : Colors.black38,
+                                      fontWeight: _sampaiTanggal != null
+                                          ? FontWeight.w600
+                                          : FontWeight.normal,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
 

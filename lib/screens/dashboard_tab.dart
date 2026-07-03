@@ -21,12 +21,13 @@ class DashboardTabState extends State<DashboardTab> {
 
   late Future<Map<String, dynamic>> _dashboardData;
   late Future<Map<String, dynamic>> _tasksFuture;
+  Map<String, dynamic>? _taskData;
 
   @override
   void initState() {
     super.initState();
     _dashboardData = DataService().ambilDataDashboard(widget.usernameSales);
-    _tasksFuture = DataService().ambilTasks(widget.usernameSales);
+    _loadTasks();
   }
 
   String _getGreeting() {
@@ -52,8 +53,22 @@ class DashboardTabState extends State<DashboardTab> {
     if (mounted) {
       setState(() {
         _dashboardData = Future.value(newData);
-        _tasksFuture = DataService().ambilTasks(widget.usernameSales);
       });
+    }
+    await _loadTasks();
+  }
+
+  Future<void> _loadTasks() async {
+    _tasksFuture = DataService().ambilTasks(widget.usernameSales);
+    try {
+      final result = await _tasksFuture;
+      if (mounted) {
+        setState(() {
+          _taskData = result;
+        });
+      }
+    } catch (_) {
+      // Tetap gunakan _taskData yang terakhir ada.
     }
   }
 
@@ -97,9 +112,13 @@ class DashboardTabState extends State<DashboardTab> {
                   Container(
                     width: double.infinity,
                     padding: EdgeInsets.fromLTRB(
-                        24, MediaQuery.of(context).padding.top + 16, 24, 24),
+                        24, MediaQuery.of(context).padding.top + 18, 24, 24),
                     decoration: const BoxDecoration(
-                      color: primaryBlue,
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [Color(0xFF003A8F), Color(0xFF004AAD)],
+                      ),
                       borderRadius: BorderRadius.only(
                         bottomLeft: Radius.circular(28),
                         bottomRight: Radius.circular(28),
@@ -137,16 +156,16 @@ class DashboardTabState extends State<DashboardTab> {
                               'Hari Ini',
                               data['total_kunjungan']?.toString() ?? '0',
                               Icons.today_rounded,
+                              primaryBlue,
                               Colors.white,
-                              Colors.white.withOpacity(0.15),
                             ),
                             const SizedBox(width: 12),
                             _buildStatCard(
                               'Total Visit',
                               data['total_keseluruhan']?.toString() ?? '0',
                               Icons.analytics_rounded,
+                              primaryBlue,
                               Colors.white,
-                              Colors.white.withOpacity(0.15),
                             ),
                           ],
                         ),
@@ -172,7 +191,7 @@ class DashboardTabState extends State<DashboardTab> {
                         FutureBuilder<Map<String, dynamic>>(
                           future: _tasksFuture,
                           builder: (context, taskSnapshot) {
-                            final taskData = taskSnapshot.data;
+                            final taskData = taskSnapshot.data ?? _taskData;
                             final semuaSelesai = taskData != null &&
                                 taskData['status'] == 'empty';
 
@@ -215,14 +234,20 @@ class DashboardTabState extends State<DashboardTab> {
                                     ),
                                     const SizedBox(width: 12),
                                     Expanded(
-                                      child: Text(
-                                        semuaSelesai
-                                            ? 'Semua tugas sudah selesai! Kerja bagus hari ini 🎉'
-                                            : 'Cek tab Tugas untuk melihat tugas yang perlu diselesaikan.',
-                                        style: TextStyle(
-                                          fontSize: 13,
-                                          color:
-                                              semuaSelesai ? green : accentRed,
+                                      child: AnimatedSwitcher(
+                                        duration:
+                                            const Duration(milliseconds: 300),
+                                        child: Text(
+                                          semuaSelesai
+                                              ? 'Semua tugas sudah selesai! Kerja bagus hari ini 🎉'
+                                              : 'Cek tab Tugas untuk melihat tugas yang perlu diselesaikan.',
+                                          key: ValueKey<bool>(semuaSelesai),
+                                          style: TextStyle(
+                                            fontSize: 13,
+                                            color: semuaSelesai
+                                                ? green
+                                                : accentRed,
+                                          ),
                                         ),
                                       ),
                                     ),
@@ -376,26 +401,38 @@ class DashboardTabState extends State<DashboardTab> {
   ) {
     return Expanded(
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
         decoration: BoxDecoration(
-          color: bgColor,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: color.withOpacity(0.3)),
+          gradient: const LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Color(0xFF0052C7), Color(0xFF004AAD)],
+          ),
+          borderRadius: BorderRadius.circular(18),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.08),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(icon, color: color, size: 20),
+            Icon(icon, color: Colors.white, size: 20),
             const SizedBox(height: 8),
             Text(
               value,
-              style: TextStyle(
-                  color: color, fontSize: 26, fontWeight: FontWeight.w800),
+              style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 26,
+                  fontWeight: FontWeight.w800),
             ),
             Text(
               label,
-              style: TextStyle(
-                  color: color.withOpacity(0.8),
+              style: const TextStyle(
+                  color: Colors.white70,
                   fontSize: 11,
                   fontWeight: FontWeight.w500),
             ),
