@@ -59,7 +59,7 @@ class DashboardTabState extends State<DashboardTab> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
         title: const Row(
           children: [
-            Icon(Icons.logout, color: Color(0xFFDB1607)),
+            Icon(Icons.logout, color: accentRed),
             SizedBox(width: 10),
             Text(
               'Keluar Aplikasi?',
@@ -74,10 +74,7 @@ class DashboardTabState extends State<DashboardTab> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text(
-              'Batal',
-              style: TextStyle(color: Colors.black45),
-            ),
+            child: const Text('Batal', style: TextStyle(color: Colors.black45)),
           ),
           ElevatedButton(
             onPressed: () {
@@ -93,10 +90,8 @@ class DashboardTabState extends State<DashboardTab> {
                   borderRadius: BorderRadius.circular(10)),
               elevation: 0,
             ),
-            child: const Text(
-              'Ya, Logout',
-              style: TextStyle(color: Colors.white),
-            ),
+            child:
+                const Text('Ya, Logout', style: TextStyle(color: Colors.white)),
           ),
         ],
       ),
@@ -126,9 +121,7 @@ class DashboardTabState extends State<DashboardTab> {
           _taskData = result;
         });
       }
-    } catch (_) {
-      // Tetap gunakan _taskData yang terakhir ada.
-    }
+    } catch (_) {}
   }
 
   Color _statusColor(String? status) {
@@ -150,6 +143,54 @@ class DashboardTabState extends State<DashboardTab> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F8FF),
+
+      // AppBar dengan badge SALES
+      appBar: AppBar(
+        backgroundColor: primaryBlue,
+        elevation: 0,
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              'Sales Monitoring',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: Colors.white.withOpacity(0.35),
+                  width: 0.5,
+                ),
+              ),
+              child: const Text(
+                'SALES',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 10,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 0.5,
+                ),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout_rounded, color: Colors.white),
+            onPressed: _handleLogout,
+            tooltip: 'Logout',
+          ),
+        ],
+      ),
+
       body: RefreshIndicator(
         onRefresh: refreshDashboard,
         color: primaryBlue,
@@ -168,25 +209,17 @@ class DashboardTabState extends State<DashboardTab> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Header
+                  // Header greeting + avatar + stat cards
                   Container(
                     width: double.infinity,
-                    padding: EdgeInsets.fromLTRB(
-                        24, MediaQuery.of(context).padding.top + 18, 24, 24),
+                    padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
                     decoration: const BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [Color(0xFF003A8F), Color(0xFF004AAD)],
-                      ),
-                      borderRadius: BorderRadius.only(
-                        bottomLeft: Radius.circular(28),
-                        bottomRight: Radius.circular(28),
-                      ),
+                      color: primaryBlue,
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        // Greeting + avatar
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -201,40 +234,49 @@ class DashboardTabState extends State<DashboardTab> {
                                         color: Colors.white70,
                                         fontWeight: FontWeight.w400),
                                   ),
-                                  const SizedBox(height: 6),
+                                  const SizedBox(height: 4),
                                   Text(
                                     widget.usernameSales,
                                     style: const TextStyle(
-                                        fontSize: 24,
+                                        fontSize: 22,
                                         color: Colors.white,
                                         fontWeight: FontWeight.w800),
                                   ),
-                                  const SizedBox(height: 4),
+                                  const SizedBox(height: 2),
                                   const Text(
                                     'Pantau target kunjungan harianmu di sini.',
                                     style: TextStyle(
-                                        fontSize: 12, color: Colors.white70),
+                                        fontSize: 12, color: Colors.white60),
                                   ),
                                 ],
                               ),
                             ),
-                            GestureDetector(
-                              onTap: _handleLogout,
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  color: Colors.white24,
-                                  borderRadius: BorderRadius.circular(14),
-                                ),
-                                padding: const EdgeInsets.all(10),
-                                child: const Icon(
-                                  Icons.logout_rounded,
-                                  color: Colors.white,
-                                  size: 22,
+                            // Avatar inisial
+                            Container(
+                              width: 44,
+                              height: 44,
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.15),
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                    color: Colors.white.withOpacity(0.3),
+                                    width: 1.5),
+                              ),
+                              child: Center(
+                                child: Text(
+                                  widget.usernameSales.isNotEmpty
+                                      ? widget.usernameSales[0].toUpperCase()
+                                      : 'S',
+                                  style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w700),
                                 ),
                               ),
                             ),
                           ],
                         ),
+
                         const SizedBox(height: 20),
 
                         // Stat cards
@@ -244,16 +286,12 @@ class DashboardTabState extends State<DashboardTab> {
                               'Hari Ini',
                               data['total_kunjungan']?.toString() ?? '0',
                               Icons.today_rounded,
-                              primaryBlue,
-                              Colors.white,
                             ),
                             const SizedBox(width: 12),
                             _buildStatCard(
                               'Total Visit',
                               data['total_keseluruhan']?.toString() ?? '0',
                               Icons.analytics_rounded,
-                              primaryBlue,
-                              Colors.white,
                             ),
                           ],
                         ),
@@ -261,6 +299,7 @@ class DashboardTabState extends State<DashboardTab> {
                     ),
                   ),
 
+                  // Body konten
                   Padding(
                     padding: const EdgeInsets.fromLTRB(20, 24, 20, 24),
                     child: Column(
@@ -273,7 +312,7 @@ class DashboardTabState extends State<DashboardTab> {
 
                         const SizedBox(height: 24),
 
-                        // Ringkasan Tugas — dinamis
+                        // Status Tugas
                         _buildSectionTitle('Status Tugas Hari Ini'),
                         const SizedBox(height: 12),
                         FutureBuilder<Map<String, dynamic>>(
@@ -282,7 +321,6 @@ class DashboardTabState extends State<DashboardTab> {
                             final taskData = taskSnapshot.data ?? _taskData;
                             final semuaSelesai = taskData != null &&
                                 taskData['status'] == 'empty';
-
                             const green = Color(0xFF00A86B);
 
                             return GestureDetector(
@@ -480,35 +518,19 @@ class DashboardTabState extends State<DashboardTab> {
     );
   }
 
-  Widget _buildStatCard(
-    String label,
-    String value,
-    IconData icon,
-    Color color,
-    Color bgColor,
-  ) {
+  Widget _buildStatCard(String label, String value, IconData icon) {
     return Expanded(
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Color(0xFF0052C7), Color(0xFF004AAD)],
-          ),
-          borderRadius: BorderRadius.circular(18),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.08),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
-            ),
-          ],
+          color: Colors.white.withOpacity(0.12),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.white.withOpacity(0.2), width: 0.5),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(icon, color: Colors.white, size: 20),
+            Icon(icon, color: Colors.white70, size: 20),
             const SizedBox(height: 8),
             Text(
               value,

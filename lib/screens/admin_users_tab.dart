@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../services/data_service.dart';
@@ -14,11 +16,23 @@ class _AdminUsersTabState extends State<AdminUsersTab> {
   static const Color accentRed = Color(0xFFDB1607);
 
   late Future<Map<String, dynamic>> _usersFuture;
+  Timer? _autoRefreshTimer;
 
   @override
   void initState() {
     super.initState();
     _refreshUsers();
+    // Auto-refresh tiap 30 detik, tanpa perlu tombol manual
+    _autoRefreshTimer = Timer.periodic(
+      const Duration(seconds: 30),
+      (_) => _refreshUsers(),
+    );
+  }
+
+  @override
+  void dispose() {
+    _autoRefreshTimer?.cancel();
+    super.dispose();
   }
 
   void _refreshUsers() {
@@ -88,53 +102,58 @@ class _AdminUsersTabState extends State<AdminUsersTab> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F8FF),
-      body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
-              child: Row(
-                children: [
-                  Container(
-                    width: 4,
-                    height: 24,
-                    decoration: BoxDecoration(
-                      color: accentRed,
-                      borderRadius: BorderRadius.circular(4),
-                    ),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header full-width, menempel di atas, flat, solid color
+          Container(
+            width: double.infinity,
+            padding: EdgeInsets.fromLTRB(
+                20, MediaQuery.of(context).padding.top + 12, 20, 16),
+            color: primaryBlue,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.white24,
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  const SizedBox(width: 10),
-                  const Column(
+                  child: const Icon(Icons.people_rounded,
+                      color: Colors.white, size: 18),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Manajemen User',
-                          style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w800,
-                              color: Colors.black87)),
-                      Text('Daftar akun sales terdaftar',
-                          style:
-                              TextStyle(fontSize: 12, color: Colors.black45)),
+                    children: const [
+                      Text(
+                        'Manajemen User',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white,
+                        ),
+                      ),
+                      SizedBox(height: 2),
+                      Text(
+                        'Daftar akun sales terdaftar.',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: Colors.white70,
+                        ),
+                      ),
                     ],
                   ),
-                  const Spacer(),
-                  GestureDetector(
-                    onTap: _refreshUsers,
-                    child: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: primaryBlue.withOpacity(0.08),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: const Icon(Icons.refresh_rounded,
-                          color: primaryBlue, size: 20),
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
-            Expanded(
+          ),
+
+          Expanded(
+            child: SafeArea(
+              top: false,
               child: FutureBuilder<Map<String, dynamic>>(
                 future: _usersFuture,
                 builder: (context, snapshot) {
@@ -170,7 +189,7 @@ class _AdminUsersTabState extends State<AdminUsersTab> {
                   final List users = data['data_users'] ?? [];
 
                   return ListView.builder(
-                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+                    padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
                     itemCount: users.length,
                     itemBuilder: (context, i) {
                       final user = users[i];
@@ -243,8 +262,8 @@ class _AdminUsersTabState extends State<AdminUsersTab> {
                 },
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

@@ -102,6 +102,54 @@ class AdminDashboardTabState extends State<AdminDashboardTab> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F8FF),
+
+      // AppBar dengan badge ADMIN, konsisten dengan Dashboard Sales
+      appBar: AppBar(
+        backgroundColor: primaryBlue,
+        elevation: 0,
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              'Sales Monitoring',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: Colors.white.withOpacity(0.35),
+                  width: 0.5,
+                ),
+              ),
+              child: const Text(
+                'ADMIN',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 10,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 0.5,
+                ),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout_rounded, color: Colors.white),
+            onPressed: _handleLogout,
+            tooltip: 'Logout',
+          ),
+        ],
+      ),
+
       body: RefreshIndicator(
         onRefresh: _refresh,
         color: primaryBlue,
@@ -120,24 +168,17 @@ class AdminDashboardTabState extends State<AdminDashboardTab> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Header greeting + avatar + stat cards
                   Container(
                     width: double.infinity,
-                    padding: EdgeInsets.fromLTRB(
-                        24, MediaQuery.of(context).padding.top + 18, 24, 24),
+                    padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
                     decoration: const BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [Color(0xFF003A8F), Color(0xFF004AAD)],
-                      ),
-                      borderRadius: BorderRadius.only(
-                        bottomLeft: Radius.circular(28),
-                        bottomRight: Radius.circular(28),
-                      ),
+                      color: primaryBlue,
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        // Greeting + avatar
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -164,28 +205,40 @@ class AdminDashboardTabState extends State<AdminDashboardTab> {
                                   const Text(
                                     'Pantau seluruh aktivitas sales di sini.',
                                     style: TextStyle(
-                                        fontSize: 12, color: Colors.white54),
+                                        fontSize: 12, color: Colors.white60),
                                   ),
                                 ],
                               ),
                             ),
-                            IconButton(
-                              onPressed: _handleLogout,
-                              style: IconButton.styleFrom(
-                                backgroundColor: Colors.white24,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(14),
-                                ),
+                            // Avatar inisial
+                            Container(
+                              width: 44,
+                              height: 44,
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.15),
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                    color: Colors.white.withOpacity(0.3),
+                                    width: 1.5),
                               ),
-                              icon: const Icon(
-                                Icons.logout_rounded,
-                                color: Colors.white,
-                                size: 20,
+                              child: Center(
+                                child: Text(
+                                  widget.usernameAdmin.isNotEmpty
+                                      ? widget.usernameAdmin[0].toUpperCase()
+                                      : 'A',
+                                  style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w700),
+                                ),
                               ),
                             ),
                           ],
                         ),
+
                         const SizedBox(height: 20),
+
+                        // Stat cards
                         Row(
                           children: [
                             _buildStatCard(
@@ -216,6 +269,8 @@ class AdminDashboardTabState extends State<AdminDashboardTab> {
                       ],
                     ),
                   ),
+
+                  // Body konten
                   Padding(
                     padding: const EdgeInsets.fromLTRB(20, 24, 20, 24),
                     child: Column(
@@ -324,37 +379,31 @@ class AdminDashboardTabState extends State<AdminDashboardTab> {
   Widget _buildStatCard(String label, String value, IconData icon) {
     return Expanded(
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Color(0xFF0052C7), Color(0xFF004AAD)],
-          ),
-          borderRadius: BorderRadius.circular(18),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.08),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
-            ),
-          ],
+          color: Colors.white.withOpacity(0.12),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.white.withOpacity(0.2), width: 0.5),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(icon, color: Colors.white, size: 20),
+            Icon(icon, color: Colors.white70, size: 20),
             const SizedBox(height: 8),
-            Text(value,
-                style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 22,
-                    fontWeight: FontWeight.w800)),
-            Text(label,
-                style: const TextStyle(
-                    color: Colors.white70,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w500)),
+            Text(
+              value,
+              style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 26,
+                  fontWeight: FontWeight.w800),
+            ),
+            Text(
+              label,
+              style: const TextStyle(
+                  color: Colors.white70,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w500),
+            ),
           ],
         ),
       ),

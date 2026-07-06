@@ -218,32 +218,56 @@ class BengkelTabState extends State<BengkelTab> {
                               color: Colors.black87,
                             ),
                           ),
-                          const SizedBox(height: 10),
-                          Wrap(
-                            spacing: 8,
-                            runSpacing: 8,
+                          const SizedBox(height: 6),
+                          GridView.count(
+                            padding: EdgeInsets.zero,
+                            crossAxisCount: 2,
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            crossAxisSpacing: 8,
+                            mainAxisSpacing: 8,
+                            childAspectRatio: 3.6,
                             children: _statusList.map((status) {
                               final isSelected = _selectedStatus == status;
                               final color = _chipColor(status);
-                              return ChoiceChip(
-                                label: Text(
-                                  status,
-                                  style: TextStyle(
-                                    color: isSelected ? Colors.white : color,
-                                    fontWeight: FontWeight.w600,
+                              return GestureDetector(
+                                onTap: () =>
+                                    setState(() => _selectedStatus = status),
+                                child: Container(
+                                  alignment: Alignment.center,
+                                  decoration: BoxDecoration(
+                                    color: isSelected
+                                        ? color.withOpacity(0.1)
+                                        : Colors.white,
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(
+                                      color: isSelected
+                                          ? color
+                                          : Colors.grey.shade300,
+                                      width: isSelected ? 1.2 : 1,
+                                    ),
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      if (isSelected) ...[
+                                        Icon(Icons.check_rounded,
+                                            size: 13, color: color),
+                                        const SizedBox(width: 4),
+                                      ],
+                                      Text(
+                                        status,
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w600,
+                                          color: isSelected
+                                              ? color
+                                              : Colors.black54,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
-                                selected: isSelected,
-                                selectedColor: color,
-                                backgroundColor: color.withOpacity(0.12),
-                                disabledColor: color.withOpacity(0.12),
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 14, vertical: 10),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                                onSelected: (_) =>
-                                    setState(() => _selectedStatus = status),
                               );
                             }).toList(),
                           ),
