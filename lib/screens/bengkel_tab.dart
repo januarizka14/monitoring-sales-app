@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart' as latlong;
 
 import '../services/data_service.dart';
 
@@ -20,10 +22,15 @@ class BengkelTabState extends State<BengkelTab> {
   final TextEditingController _namaBengkelController = TextEditingController();
   final TextEditingController _catatanController = TextEditingController();
 
+  // Controller untuk peta, dipakai buat pindahin posisi kamera peta
+  // secara otomatis begitu koordinat GPS berhasil didapat.
+  final MapController _mapController = MapController();
+
   String? _selectedStatus;
   final List<String> _statusList = ['Sukses', 'Follow-up', 'Tutup', 'Ditolak'];
 
   bool _isSaving = false;
+  bool _isLocating = true;
   String _latitude = '-6.2088';
   String _longitude = '106.8456';
 
@@ -33,7 +40,13 @@ class BengkelTabState extends State<BengkelTab> {
     _fetchLocation();
   }
 
+  latlong.LatLng get _currentLatLng => latlong.LatLng(
+        double.tryParse(_latitude) ?? -6.2088,
+        double.tryParse(_longitude) ?? 106.8456,
+      );
+
   Future<void> _fetchLocation() async {
+    setState(() => _isLocating = true);
     try {
       final position = await Geolocator.getCurrentPosition(
           desiredAccuracy: LocationAccuracy.high);
@@ -42,8 +55,14 @@ class BengkelTabState extends State<BengkelTab> {
           _latitude = position.latitude.toStringAsFixed(6);
           _longitude = position.longitude.toStringAsFixed(6);
         });
+        // Setelah lokasi baru didapat, geser kamera peta ke titik terbaru.
+        _mapController.move(_currentLatLng, 16);
       }
-    } catch (_) {}
+    } catch (_) {
+      // Kalau gagal ambil lokasi, biarkan pakai koordinat default.
+    } finally {
+      if (mounted) setState(() => _isLocating = false);
+    }
   }
 
   Future<void> _openGoogleMaps() async {
@@ -283,12 +302,81 @@ class BengkelTabState extends State<BengkelTab> {
                         children: [
                           TextFormField(
                             controller: _catatanController,
-                            maxLines: 3,
+                            minLines: 1,
+                            maxLines: null,
+                            keyboardType: TextInputType.multiline,
+                            textInputAction: TextInputAction.newline,
                             decoration: _inputDecor(
-                                'Catatan Tambahan (opsional)',
-                                Icons.notes_rounded),
+                                    'Catatan Tambahan (opsional)',
+                                    Icons.notes_rounded)
+                                .copyWith(
+                                    hintText: 'Masukkan catatan tambahan'),
                           ),
                           const SizedBox(height: 14),
+
+                          // Preview peta lokasi
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(14),
+                            child: SizedBox(
+                              height: 160,
+                              width: double.infinity,
+                              child: Stack(
+                                children: [
+                                  IgnorePointer(
+                                    // Peta hanya sebagai preview, tidak bisa
+                                    // di-drag/zoom supaya tidak mengganggu
+                                    // scroll form.
+                                    child: FlutterMap(
+                                      mapController: _mapController,
+                                      options: MapOptions(
+                                        initialCenter: _currentLatLng,
+                                        initialZoom: 16,
+                                      ),
+                                      children: [
+                                        TileLayer(
+                                          urlTemplate:
+                                              'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                                          userAgentPackageName:
+                                              'com.example.monitoring_sales_app',
+                                        ),
+                                        MarkerLayer(
+                                          markers: [
+                                            Marker(
+                                              point: _currentLatLng,
+                                              width: 40,
+                                              height: 40,
+                                              child: const Icon(
+                                                Icons.location_on_rounded,
+                                                color: accentRed,
+                                                size: 36,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  if (_isLocating)
+                                    Container(
+                                      color: Colors.white70,
+                                      child: const Center(
+                                        child: SizedBox(
+                                          width: 24,
+                                          height: 24,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2.5,
+                                            color: primaryBlue,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ),
+                          ),
+
+                          const SizedBox(height: 10),
+
                           Container(
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 14, vertical: 10),
