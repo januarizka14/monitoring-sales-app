@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../services/data_service.dart';
+import 'login_screen.dart';
 
 class AdminDashboardTab extends StatefulWidget {
   final String usernameAdmin;
@@ -53,6 +54,50 @@ class AdminDashboardTabState extends State<AdminDashboardTab> {
     await _refresh();
   }
 
+  void _handleLogout() {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+        title: const Row(
+          children: [
+            Icon(Icons.logout, color: Color(0xFFDB1607)),
+            SizedBox(width: 10),
+            Text('Keluar Aplikasi?',
+                style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700)),
+          ],
+        ),
+        content: const Text(
+          'Kamu akan keluar dari akun admin. Yakin ingin logout?',
+          style: TextStyle(fontSize: 14, color: Colors.black54),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Batal', style: TextStyle(color: Colors.black45)),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(builder: (_) => const LoginScreen()),
+                (route) => false,
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFDB1607),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10)),
+              elevation: 0,
+            ),
+            child:
+                const Text('Ya, Logout', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -93,25 +138,52 @@ class AdminDashboardTabState extends State<AdminDashboardTab> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          '${_getGreeting()} ${_getGreetingEmoji()}',
-                          style: const TextStyle(
-                              fontSize: 13,
-                              color: Colors.white70,
-                              fontWeight: FontWeight.w400),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          widget.usernameAdmin,
-                          style: const TextStyle(
-                              fontSize: 22,
-                              color: Colors.white,
-                              fontWeight: FontWeight.w800),
-                        ),
-                        const SizedBox(height: 2),
-                        const Text(
-                          'Pantau seluruh aktivitas sales di sini.',
-                          style: TextStyle(fontSize: 12, color: Colors.white54),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    '${_getGreeting()} ${_getGreetingEmoji()}',
+                                    style: const TextStyle(
+                                        fontSize: 13,
+                                        color: Colors.white70,
+                                        fontWeight: FontWeight.w400),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    widget.usernameAdmin,
+                                    style: const TextStyle(
+                                        fontSize: 22,
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w800),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  const Text(
+                                    'Pantau seluruh aktivitas sales di sini.',
+                                    style: TextStyle(
+                                        fontSize: 12, color: Colors.white54),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            IconButton(
+                              onPressed: _handleLogout,
+                              style: IconButton.styleFrom(
+                                backgroundColor: Colors.white24,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
+                              ),
+                              icon: const Icon(
+                                Icons.logout_rounded,
+                                color: Colors.white,
+                                size: 20,
+                              ),
+                            ),
+                          ],
                         ),
                         const SizedBox(height: 20),
                         Row(

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../services/data_service.dart';
@@ -15,11 +17,23 @@ class _TasksTabState extends State<TasksTab> {
   static const Color accentRed = Color(0xFFDB1607);
 
   late Future<Map<String, dynamic>> _tasksFuture;
+  Timer? _autoRefreshTimer;
 
   @override
   void initState() {
     super.initState();
     _refreshTasks();
+    // Auto-refresh tiap 30 detik, tanpa perlu tombol manual
+    _autoRefreshTimer = Timer.periodic(
+      const Duration(seconds: 30),
+      (_) => _refreshTasks(),
+    );
+  }
+
+  @override
+  void dispose() {
+    _autoRefreshTimer?.cancel();
+    super.dispose();
   }
 
   void _refreshTasks() {
@@ -98,59 +112,58 @@ class _TasksTabState extends State<TasksTab> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F8FF),
-      body: SafeArea(
-        child: Column(
-          children: [
-            // Judul inline compact
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
-              child: Row(
-                children: [
-                  Container(
-                    width: 4,
-                    height: 24,
-                    decoration: BoxDecoration(
-                      color: accentRed,
-                      borderRadius: BorderRadius.circular(4),
-                    ),
+      body: Column(
+        children: [
+          // Header full-width, menempel di atas, flat, solid color
+          Container(
+            width: double.infinity,
+            padding: EdgeInsets.fromLTRB(
+                20, MediaQuery.of(context).padding.top + 12, 20, 16),
+            color: primaryBlue,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.white24,
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  const SizedBox(width: 10),
-                  const Column(
+                  child:
+                      const Icon(Icons.task_alt, color: Colors.white, size: 18),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
+                    children: const [
                       Text(
                         'Daftar Penugasan',
                         style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w800,
-                          color: Colors.black87,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white,
                         ),
                       ),
+                      SizedBox(height: 2),
                       Text(
-                        'Tugas yang perlu diselesaikan segera',
-                        style: TextStyle(fontSize: 12, color: Colors.black45),
+                        'Lihat tugas harian dan tandai selesai dengan cepat.',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: Colors.white70,
+                        ),
                       ),
                     ],
                   ),
-                  const Spacer(),
-                  GestureDetector(
-                    onTap: _refreshTasks,
-                    child: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: primaryBlue.withOpacity(0.08),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: const Icon(Icons.refresh_rounded,
-                          color: primaryBlue, size: 20),
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
+          ),
 
-            // Body
-            Expanded(
+          // Body
+          Expanded(
+            child: SafeArea(
+              top: false,
               child: FutureBuilder<Map<String, dynamic>>(
                 future: _tasksFuture,
                 builder: (context, snapshot) {
@@ -246,7 +259,7 @@ class _TasksTabState extends State<TasksTab> {
                   // List tugas
                   final List tasks = data['data_tasks'];
                   return ListView.builder(
-                    padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
+                    padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
                     itemCount: tasks.length,
                     itemBuilder: (context, i) {
                       final task = tasks[i];
@@ -361,8 +374,8 @@ class _TasksTabState extends State<TasksTab> {
                 },
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

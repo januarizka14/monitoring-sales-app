@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../services/data_service.dart';
+import 'login_screen.dart';
 
 class DashboardTab extends StatefulWidget {
   final String usernameSales;
@@ -49,6 +50,57 @@ class DashboardTabState extends State<DashboardTab> {
     if (hour < 15) return '☀️';
     if (hour < 19) return '🌇';
     return '🌙';
+  }
+
+  void _handleLogout() {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+        title: const Row(
+          children: [
+            Icon(Icons.logout, color: Color(0xFFDB1607)),
+            SizedBox(width: 10),
+            Text(
+              'Keluar Aplikasi?',
+              style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700),
+            ),
+          ],
+        ),
+        content: const Text(
+          'Kamu akan keluar dari akun ini. Yakin ingin logout?',
+          style: TextStyle(fontSize: 14, color: Colors.black54),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text(
+              'Batal',
+              style: TextStyle(color: Colors.black45),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(builder: (_) => const LoginScreen()),
+                (route) => false,
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: accentRed,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10)),
+              elevation: 0,
+            ),
+            child: const Text(
+              'Ya, Logout',
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   // TIDAK DIUBAH — dipanggil dari MainNavigation via GlobalKey
@@ -135,25 +187,53 @@ class DashboardTabState extends State<DashboardTab> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          '${_getGreeting()} ${_getGreetingEmoji()}',
-                          style: const TextStyle(
-                              fontSize: 13,
-                              color: Colors.white70,
-                              fontWeight: FontWeight.w400),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          widget.usernameSales,
-                          style: const TextStyle(
-                              fontSize: 22,
-                              color: Colors.white,
-                              fontWeight: FontWeight.w800),
-                        ),
-                        const SizedBox(height: 2),
-                        const Text(
-                          'Pantau target kunjungan harianmu di sini.',
-                          style: TextStyle(fontSize: 12, color: Colors.white54),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    '${_getGreeting()} ${_getGreetingEmoji()}',
+                                    style: const TextStyle(
+                                        fontSize: 13,
+                                        color: Colors.white70,
+                                        fontWeight: FontWeight.w400),
+                                  ),
+                                  const SizedBox(height: 6),
+                                  Text(
+                                    widget.usernameSales,
+                                    style: const TextStyle(
+                                        fontSize: 24,
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w800),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  const Text(
+                                    'Pantau target kunjungan harianmu di sini.',
+                                    style: TextStyle(
+                                        fontSize: 12, color: Colors.white70),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            GestureDetector(
+                              onTap: _handleLogout,
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.white24,
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
+                                padding: const EdgeInsets.all(10),
+                                child: const Icon(
+                                  Icons.logout_rounded,
+                                  color: Colors.white,
+                                  size: 22,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                         const SizedBox(height: 20),
 

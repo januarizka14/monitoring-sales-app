@@ -134,195 +134,220 @@ class BengkelTabState extends State<BengkelTab> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F8FF),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(20, 20, 20, 32),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+      body: Column(
+        children: [
+          // Header full-width, menempel di atas, ukuran lebih ringkas
+          Container(
+            width: double.infinity,
+            padding: EdgeInsets.fromLTRB(
+                20, MediaQuery.of(context).padding.top + 12, 20, 16),
+            color: primaryBlue,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // Judul inline — compact, tidak makan ruang
-                Row(
-                  children: [
-                    Container(
-                      width: 4,
-                      height: 24,
-                      decoration: BoxDecoration(
-                        color: accentRed,
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    const Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Laporan Kunjungan',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w800,
-                            color: Colors.black87,
-                          ),
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.white24,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(
+                    Icons.storefront_rounded,
+                    color: Colors.white,
+                    size: 18,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: const [
+                      Text(
+                        'Laporan Kunjungan',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white,
                         ),
-                        Text(
-                          'Catat kunjungan bengkel hari ini',
-                          style: TextStyle(fontSize: 12, color: Colors.black45),
+                      ),
+                      SizedBox(height: 2),
+                      Text(
+                        'Catat kunjungan bengkel hari ini dengan cepat.',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: Colors.white70,
                         ),
-                      ],
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 20),
-
-                // Kartu Informasi Bengkel
-                _buildSectionCard(
-                  title: 'Informasi Bengkel',
-                  icon: Icons.storefront_rounded,
-                  children: [
-                    TextFormField(
-                      controller: _namaBengkelController,
-                      decoration:
-                          _inputDecor('Nama Bengkel', Icons.storefront_rounded)
-                              .copyWith(hintText: 'Masukkan nama bengkel'),
-                      validator: (v) =>
-                          v!.isEmpty ? 'Nama bengkel wajib diisi' : null,
-                    ),
-                    const SizedBox(height: 18),
-                    const Text(
-                      'Status Kunjungan',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 13,
-                        color: Colors.black87,
                       ),
-                    ),
-                    const SizedBox(height: 10),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: _statusList.map((status) {
-                        final isSelected = _selectedStatus == status;
-                        final color = _chipColor(status);
-                        return ChoiceChip(
-                          label: Text(
-                            status,
-                            style: TextStyle(
-                              color: isSelected ? Colors.white : color,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          selected: isSelected,
-                          selectedColor: color,
-                          backgroundColor: color.withOpacity(0.12),
-                          disabledColor: color.withOpacity(0.12),
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 14, vertical: 10),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          onSelected: (_) =>
-                              setState(() => _selectedStatus = status),
-                        );
-                      }).toList(),
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 14),
-
-                // Kartu Catatan & Lokasi
-                _buildSectionCard(
-                  title: 'Catatan & Lokasi',
-                  icon: Icons.location_on_rounded,
-                  children: [
-                    TextFormField(
-                      controller: _catatanController,
-                      maxLines: 3,
-                      decoration: _inputDecor(
-                          'Catatan Tambahan (opsional)', Icons.notes_rounded),
-                    ),
-                    const SizedBox(height: 14),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 14, vertical: 10),
-                      decoration: BoxDecoration(
-                        color: primaryBlue.withOpacity(0.05),
-                        borderRadius: BorderRadius.circular(10),
-                        border:
-                            Border.all(color: primaryBlue.withOpacity(0.15)),
-                      ),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.my_location_rounded,
-                              size: 16, color: primaryBlue),
-                          const SizedBox(width: 8),
-                          Text(
-                            '$_latitude, $_longitude',
-                            style: const TextStyle(
-                                fontSize: 12, color: Colors.black54),
-                          ),
-                          const Spacer(),
-                          GestureDetector(
-                            onTap: _openGoogleMaps,
-                            child: const Text(
-                              'Buka Maps',
-                              style: TextStyle(
-                                  fontSize: 12,
-                                  color: accentRed,
-                                  fontWeight: FontWeight.w600),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 24),
-
-                // Tombol Simpan
-                SizedBox(
-                  width: double.infinity,
-                  height: 52,
-                  child: ElevatedButton(
-                    onPressed: _isSaving ? null : _saveData,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: primaryBlue,
-                      disabledBackgroundColor: primaryBlue.withOpacity(0.5),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14)),
-                      elevation: 0,
-                    ),
-                    child: _isSaving
-                        ? const SizedBox(
-                            width: 22,
-                            height: 22,
-                            child: CircularProgressIndicator(
-                                color: Colors.white, strokeWidth: 2.5),
-                          )
-                        : const Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(Icons.save_rounded,
-                                  color: Colors.white, size: 20),
-                              SizedBox(width: 8),
-                              Text(
-                                'Simpan Kunjungan',
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w700,
-                                    fontSize: 15),
-                              ),
-                            ],
-                          ),
+                    ],
                   ),
                 ),
               ],
             ),
           ),
-        ),
+
+          // Konten form, bisa di-scroll
+          Expanded(
+            child: SafeArea(
+              top: false,
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(20, 20, 20, 32),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Kartu Informasi Bengkel
+                      _buildSectionCard(
+                        title: 'Informasi Bengkel',
+                        icon: Icons.storefront_rounded,
+                        children: [
+                          TextFormField(
+                            controller: _namaBengkelController,
+                            decoration: _inputDecor(
+                                    'Nama Bengkel', Icons.storefront_rounded)
+                                .copyWith(hintText: 'Masukkan nama bengkel'),
+                            validator: (v) =>
+                                v!.isEmpty ? 'Nama bengkel wajib diisi' : null,
+                          ),
+                          const SizedBox(height: 18),
+                          const Text(
+                            'Status Kunjungan',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 13,
+                              color: Colors.black87,
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: _statusList.map((status) {
+                              final isSelected = _selectedStatus == status;
+                              final color = _chipColor(status);
+                              return ChoiceChip(
+                                label: Text(
+                                  status,
+                                  style: TextStyle(
+                                    color: isSelected ? Colors.white : color,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                selected: isSelected,
+                                selectedColor: color,
+                                backgroundColor: color.withOpacity(0.12),
+                                disabledColor: color.withOpacity(0.12),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 14, vertical: 10),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                onSelected: (_) =>
+                                    setState(() => _selectedStatus = status),
+                              );
+                            }).toList(),
+                          ),
+                        ],
+                      ),
+
+                      const SizedBox(height: 14),
+
+                      // Kartu Catatan & Lokasi
+                      _buildSectionCard(
+                        title: 'Catatan & Lokasi',
+                        icon: Icons.location_on_rounded,
+                        children: [
+                          TextFormField(
+                            controller: _catatanController,
+                            maxLines: 3,
+                            decoration: _inputDecor(
+                                'Catatan Tambahan (opsional)',
+                                Icons.notes_rounded),
+                          ),
+                          const SizedBox(height: 14),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 14, vertical: 10),
+                            decoration: BoxDecoration(
+                              color: primaryBlue.withOpacity(0.05),
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(
+                                  color: primaryBlue.withOpacity(0.15)),
+                            ),
+                            child: Row(
+                              children: [
+                                const Icon(Icons.my_location_rounded,
+                                    size: 16, color: primaryBlue),
+                                const SizedBox(width: 8),
+                                Text(
+                                  '$_latitude, $_longitude',
+                                  style: const TextStyle(
+                                      fontSize: 12, color: Colors.black54),
+                                ),
+                                const Spacer(),
+                                GestureDetector(
+                                  onTap: _openGoogleMaps,
+                                  child: const Text(
+                                    'Buka Maps',
+                                    style: TextStyle(
+                                        fontSize: 12,
+                                        color: accentRed,
+                                        fontWeight: FontWeight.w600),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      const SizedBox(height: 24),
+
+                      // Tombol Simpan
+                      SizedBox(
+                        width: double.infinity,
+                        height: 52,
+                        child: ElevatedButton(
+                          onPressed: _isSaving ? null : _saveData,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: primaryBlue,
+                            disabledBackgroundColor:
+                                primaryBlue.withOpacity(0.5),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14)),
+                            elevation: 0,
+                          ),
+                          child: _isSaving
+                              ? const SizedBox(
+                                  width: 22,
+                                  height: 22,
+                                  child: CircularProgressIndicator(
+                                      color: Colors.white, strokeWidth: 2.5),
+                                )
+                              : Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: const [
+                                    Icon(Icons.save_rounded,
+                                        color: Colors.white, size: 20),
+                                    SizedBox(width: 8),
+                                    Text(
+                                      'Simpan Kunjungan',
+                                      style: TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.w700,
+                                          fontSize: 15),
+                                    ),
+                                  ],
+                                ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

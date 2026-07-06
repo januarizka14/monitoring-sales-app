@@ -214,436 +214,470 @@ class RiwayatTabState extends State<RiwayatTab> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F8FF),
-      body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Judul
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
-              child: Row(
-                children: [
-                  Container(
-                    width: 4,
-                    height: 24,
-                    decoration: BoxDecoration(
-                      color: accentRed,
-                      borderRadius: BorderRadius.circular(4),
-                    ),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header full-width, menempel di atas, flat, solid color
+          Container(
+            width: double.infinity,
+            padding: EdgeInsets.fromLTRB(
+                20, MediaQuery.of(context).padding.top + 12, 20, 16),
+            color: primaryBlue,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.white24,
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  const SizedBox(width: 10),
-                  const Column(
+                  child: const Icon(Icons.history_rounded,
+                      color: Colors.white, size: 18),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
+                    children: const [
                       Text('Riwayat Kunjungan',
                           style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w800,
-                              color: Colors.black87)),
-                      Text('Seluruh riwayat kunjungan bengkel',
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.white)),
+                      SizedBox(height: 2),
+                      Text('Lihat riwayat semua kunjungan sales.',
                           style:
-                              TextStyle(fontSize: 12, color: Colors.black45)),
+                              TextStyle(fontSize: 11, color: Colors.white70)),
                     ],
                   ),
-                ],
-              ),
-            ),
-
-            // Kartu search + filter
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Container(
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.04),
-                      blurRadius: 10,
-                      offset: const Offset(0, 6),
-                    ),
-                  ],
                 ),
-                child: Column(
-                  children: [
-                    TextField(
-                      controller: _searchController,
-                      onChanged: (val) {
-                        setState(() => _searchQuery = val.trim());
-                        Future.delayed(const Duration(milliseconds: 500), () {
-                          if (_searchQuery == val.trim()) _loadData();
-                        });
-                      },
-                      decoration: InputDecoration(
-                        hintText: 'Cari nama bengkel...',
-                        hintStyle: const TextStyle(
-                            fontSize: 13, color: Colors.black38),
-                        prefixIcon: const Icon(Icons.search_rounded,
-                            color: primaryBlue),
-                        suffixIcon: _searchQuery.isNotEmpty
-                            ? IconButton(
-                                icon: const Icon(Icons.close_rounded,
-                                    color: Colors.black38, size: 18),
-                                onPressed: () {
-                                  _searchController.clear();
-                                  setState(() => _searchQuery = '');
-                                  _loadData();
-                                },
-                              )
-                            : null,
-                        filled: true,
-                        fillColor: const Color(0xFFEFF4FF),
-                        contentPadding:
-                            const EdgeInsets.symmetric(vertical: 14),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(14),
-                          borderSide: BorderSide.none,
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(14),
-                          borderSide:
-                              const BorderSide(color: primaryBlue, width: 1.5),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 14, vertical: 12),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFF5F8FF),
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                            child: DropdownButtonHideUnderline(
-                              child: DropdownButton<String>(
-                                value: _selectedStatus.isEmpty
-                                    ? 'Semua'
-                                    : _selectedStatus,
-                                isExpanded: true,
-                                items: _statusList.map((s) {
-                                  final color = s == 'Semua'
-                                      ? Colors.black
-                                      : _statusColor(s.toLowerCase());
-                                  return DropdownMenuItem<String>(
-                                    value: s,
-                                    child: Text(
-                                      s,
-                                      style: TextStyle(color: color),
-                                    ),
-                                  );
-                                }).toList(),
-                                onChanged: (val) {
-                                  if (val == null) return;
-                                  setState(() => _selectedStatus =
-                                      val == 'Semua' ? '' : val);
-                                  _loadData();
-                                },
-                                icon: const Icon(
-                                    Icons.keyboard_arrow_down_rounded,
-                                    color: primaryBlue),
-                              ),
-                            ),
-                          ),
-                        ),
-                        if (_adaFilter) ...[
-                          const SizedBox(width: 10),
-                          GestureDetector(
-                            onTap: _resetFilter,
-                            child: Container(
-                              padding: const EdgeInsets.all(10),
-                              decoration: BoxDecoration(
-                                color: accentRed.withOpacity(0.08),
-                                borderRadius: BorderRadius.circular(14),
-                              ),
-                              child: const Icon(
-                                Icons.filter_alt_off_rounded,
-                                size: 18,
-                                color: accentRed,
-                              ),
-                            ),
+              ],
+            ),
+          ),
+
+          Expanded(
+            child: SafeArea(
+              top: false,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 16),
+
+                  // Kartu search + filter
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Container(
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.04),
+                            blurRadius: 12,
+                            offset: const Offset(0, 6),
                           ),
                         ],
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: GestureDetector(
-                            onTap: () => _pilihTanggal(context, true),
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 12, vertical: 10),
-                              decoration: BoxDecoration(
-                                color: _dariTanggal != null
-                                    ? primaryBlue.withOpacity(0.08)
-                                    : const Color(0xFFF5F8FF),
+                      ),
+                      child: Column(
+                        children: [
+                          TextField(
+                            controller: _searchController,
+                            onChanged: (val) {
+                              setState(() => _searchQuery = val.trim());
+                              Future.delayed(const Duration(milliseconds: 500),
+                                  () {
+                                if (_searchQuery == val.trim()) _loadData();
+                              });
+                            },
+                            decoration: InputDecoration(
+                              hintText: 'Cari nama bengkel...',
+                              hintStyle: const TextStyle(
+                                  fontSize: 13, color: Colors.black38),
+                              prefixIcon: const Icon(Icons.search_rounded,
+                                  color: primaryBlue),
+                              suffixIcon: _searchQuery.isNotEmpty
+                                  ? IconButton(
+                                      icon: const Icon(Icons.close_rounded,
+                                          color: Colors.black38, size: 18),
+                                      onPressed: () {
+                                        _searchController.clear();
+                                        setState(() => _searchQuery = '');
+                                        _loadData();
+                                      },
+                                    )
+                                  : null,
+                              filled: true,
+                              fillColor: const Color(0xFFEFF4FF),
+                              contentPadding:
+                                  const EdgeInsets.symmetric(vertical: 14),
+                              border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(14),
+                                borderSide: BorderSide.none,
                               ),
-                              child: Row(
-                                children: [
-                                  Icon(Icons.calendar_today_rounded,
-                                      size: 14,
-                                      color: _dariTanggal != null
-                                          ? primaryBlue
-                                          : Colors.black38),
-                                  const SizedBox(width: 6),
-                                  Text(
-                                    _dariTanggal != null
-                                        ? _formatTanggal(_dariTanggal!)
-                                        : 'Dari tanggal',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: _dariTanggal != null
-                                          ? primaryBlue
-                                          : Colors.black38,
-                                      fontWeight: _dariTanggal != null
-                                          ? FontWeight.w600
-                                          : FontWeight.normal,
-                                    ),
-                                  ),
-                                ],
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(14),
+                                borderSide: const BorderSide(
+                                    color: primaryBlue, width: 1.5),
                               ),
                             ),
                           ),
-                        ),
-                        const SizedBox(width: 8),
-                        const Text('—',
-                            style: TextStyle(color: Colors.black38)),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: GestureDetector(
-                            onTap: () => _pilihTanggal(context, false),
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 12, vertical: 10),
-                              decoration: BoxDecoration(
-                                color: _sampaiTanggal != null
-                                    ? primaryBlue.withOpacity(0.08)
-                                    : const Color(0xFFF5F8FF),
-                                borderRadius: BorderRadius.circular(14),
-                              ),
-                              child: Row(
-                                children: [
-                                  Icon(Icons.calendar_today_rounded,
-                                      size: 14,
-                                      color: _sampaiTanggal != null
-                                          ? primaryBlue
-                                          : Colors.black38),
-                                  const SizedBox(width: 6),
-                                  Text(
-                                    _sampaiTanggal != null
-                                        ? _formatTanggal(_sampaiTanggal!)
-                                        : 'Sampai tanggal',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: _sampaiTanggal != null
-                                          ? primaryBlue
-                                          : Colors.black38,
-                                      fontWeight: _sampaiTanggal != null
-                                          ? FontWeight.w600
-                                          : FontWeight.normal,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 12),
-
-            // List
-            Expanded(
-              child: _isLoading
-                  ? const Center(
-                      child: CircularProgressIndicator(color: primaryBlue))
-                  : _kunjungan.isEmpty
-                      ? Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
+                          const SizedBox(height: 12),
+                          Row(
                             children: [
-                              Container(
-                                padding: const EdgeInsets.all(20),
-                                decoration: BoxDecoration(
-                                  color: primaryBlue.withOpacity(0.08),
-                                  shape: BoxShape.circle,
+                              Expanded(
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 14),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFF5F8FF),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: DropdownButtonHideUnderline(
+                                    child: DropdownButton<String>(
+                                      value: _selectedStatus.isEmpty
+                                          ? 'Semua'
+                                          : _selectedStatus,
+                                      isExpanded: true,
+                                      items: _statusList.map((s) {
+                                        final color = s == 'Semua'
+                                            ? Colors.black
+                                            : _statusColor(s.toLowerCase());
+                                        return DropdownMenuItem<String>(
+                                          value: s,
+                                          child: Text(
+                                            s,
+                                            style: TextStyle(color: color),
+                                          ),
+                                        );
+                                      }).toList(),
+                                      onChanged: (val) {
+                                        if (val == null) return;
+                                        setState(() => _selectedStatus =
+                                            val == 'Semua' ? '' : val);
+                                        _loadData();
+                                      },
+                                      icon: const Icon(
+                                          Icons.keyboard_arrow_down_rounded,
+                                          color: primaryBlue),
+                                    ),
+                                  ),
                                 ),
-                                child: Icon(
-                                  _adaFilter
-                                      ? Icons.search_off_rounded
-                                      : Icons.history_rounded,
-                                  size: 48,
-                                  color: primaryBlue,
-                                ),
-                              ),
-                              const SizedBox(height: 16),
-                              Text(
-                                _adaFilter
-                                    ? 'Tidak ada hasil yang cocok.'
-                                    : 'Belum ada riwayat kunjungan.',
-                                style: const TextStyle(
-                                    color: Colors.black45, fontSize: 15),
                               ),
                               if (_adaFilter) ...[
-                                const SizedBox(height: 12),
+                                const SizedBox(width: 10),
                                 GestureDetector(
                                   onTap: _resetFilter,
-                                  child: const Text(
-                                    'Reset filter',
-                                    style: TextStyle(
-                                        color: accentRed,
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.w600),
+                                  child: Container(
+                                    padding: const EdgeInsets.all(10),
+                                    decoration: BoxDecoration(
+                                      color: accentRed.withOpacity(0.08),
+                                      borderRadius: BorderRadius.circular(14),
+                                    ),
+                                    child: const Icon(
+                                      Icons.filter_alt_off_rounded,
+                                      size: 18,
+                                      color: accentRed,
+                                    ),
                                   ),
                                 ),
                               ],
                             ],
                           ),
-                        )
-                      : RefreshIndicator(
-                          onRefresh: refreshRiwayat,
-                          color: primaryBlue,
-                          child: ListView.builder(
-                            controller: _scrollController,
-                            padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
-                            itemCount: _kunjungan.length + (_hasMore ? 1 : 0),
-                            itemBuilder: (context, index) {
-                              if (index == _kunjungan.length) {
-                                return const Padding(
-                                  padding: EdgeInsets.symmetric(vertical: 16),
-                                  child: Center(
-                                    child: CircularProgressIndicator(
-                                        color: primaryBlue, strokeWidth: 2),
-                                  ),
-                                );
-                              }
-
-                              final item = _kunjungan[index];
-                              final status =
-                                  item['status_kunjungan'] as String?;
-                              final statusColor = _statusColor(status);
-
-                              return Container(
-                                margin: const EdgeInsets.only(bottom: 12),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(16),
-                                  border:
-                                      Border.all(color: Colors.grey.shade100),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withOpacity(0.04),
-                                      blurRadius: 10,
-                                      offset: const Offset(0, 3),
+                          const SizedBox(height: 12),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: GestureDetector(
+                                  onTap: () => _pilihTanggal(context, true),
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 12, vertical: 10),
+                                    decoration: BoxDecoration(
+                                      color: _dariTanggal != null
+                                          ? primaryBlue.withOpacity(0.08)
+                                          : const Color(0xFFF5F8FF),
+                                      borderRadius: BorderRadius.circular(12),
                                     ),
-                                  ],
+                                    child: Row(
+                                      children: [
+                                        Icon(Icons.calendar_today_rounded,
+                                            size: 14,
+                                            color: _dariTanggal != null
+                                                ? primaryBlue
+                                                : Colors.black38),
+                                        const SizedBox(width: 6),
+                                        Text(
+                                          _dariTanggal != null
+                                              ? _formatTanggal(_dariTanggal!)
+                                              : 'Dari tanggal',
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            color: _dariTanggal != null
+                                                ? primaryBlue
+                                                : Colors.black38,
+                                            fontWeight: _dariTanggal != null
+                                                ? FontWeight.w600
+                                                : FontWeight.normal,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                                 ),
-                                child: Row(
+                              ),
+                              const SizedBox(width: 8),
+                              const Text('—',
+                                  style: TextStyle(color: Colors.black38)),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: GestureDetector(
+                                  onTap: () => _pilihTanggal(context, false),
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 12, vertical: 10),
+                                    decoration: BoxDecoration(
+                                      color: _sampaiTanggal != null
+                                          ? primaryBlue.withOpacity(0.08)
+                                          : const Color(0xFFF5F8FF),
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Icon(Icons.calendar_today_rounded,
+                                            size: 14,
+                                            color: _sampaiTanggal != null
+                                                ? primaryBlue
+                                                : Colors.black38),
+                                        const SizedBox(width: 6),
+                                        Text(
+                                          _sampaiTanggal != null
+                                              ? _formatTanggal(_sampaiTanggal!)
+                                              : 'Sampai tanggal',
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            color: _sampaiTanggal != null
+                                                ? primaryBlue
+                                                : Colors.black38,
+                                            fontWeight: _sampaiTanggal != null
+                                                ? FontWeight.w600
+                                                : FontWeight.normal,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  // List
+                  Expanded(
+                    child: _isLoading
+                        ? const Center(
+                            child:
+                                CircularProgressIndicator(color: primaryBlue))
+                        : _kunjungan.isEmpty
+                            ? Center(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Container(
-                                      width: 4,
-                                      height: 90,
+                                      padding: const EdgeInsets.all(20),
                                       decoration: BoxDecoration(
-                                        color: statusColor,
-                                        borderRadius: const BorderRadius.only(
-                                          topLeft: Radius.circular(16),
-                                          bottomLeft: Radius.circular(16),
+                                        color: primaryBlue.withOpacity(0.08),
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: Icon(
+                                        _adaFilter
+                                            ? Icons.search_off_rounded
+                                            : Icons.history_rounded,
+                                        size: 48,
+                                        color: primaryBlue,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 16),
+                                    Text(
+                                      _adaFilter
+                                          ? 'Tidak ada hasil yang cocok.'
+                                          : 'Belum ada riwayat kunjungan.',
+                                      style: const TextStyle(
+                                          color: Colors.black45, fontSize: 15),
+                                    ),
+                                    if (_adaFilter) ...[
+                                      const SizedBox(height: 12),
+                                      GestureDetector(
+                                        onTap: _resetFilter,
+                                        child: const Text(
+                                          'Reset filter',
+                                          style: TextStyle(
+                                              color: accentRed,
+                                              fontSize: 13,
+                                              fontWeight: FontWeight.w600),
                                         ),
                                       ),
-                                    ),
-                                    const SizedBox(width: 14),
-                                    Container(
-                                      padding: const EdgeInsets.all(10),
-                                      decoration: BoxDecoration(
-                                        color: statusColor.withOpacity(0.1),
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                      child: Icon(_statusIcon(status),
-                                          color: statusColor, size: 22),
-                                    ),
-                                    const SizedBox(width: 14),
-                                    Expanded(
-                                      child: Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                            vertical: 14),
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              item['nama_bengkel'] ?? '-',
-                                              style: const TextStyle(
-                                                  fontWeight: FontWeight.w700,
-                                                  fontSize: 15,
-                                                  color: Colors.black87),
-                                            ),
-                                            const SizedBox(height: 5),
-                                            Container(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                      horizontal: 8,
-                                                      vertical: 3),
-                                              decoration: BoxDecoration(
-                                                color: statusColor
-                                                    .withOpacity(0.1),
-                                                borderRadius:
-                                                    BorderRadius.circular(20),
-                                              ),
-                                              child: Text(
-                                                status ?? '-',
-                                                style: TextStyle(
-                                                  color: statusColor,
-                                                  fontSize: 11,
-                                                  fontWeight: FontWeight.w600,
-                                                ),
-                                              ),
-                                            ),
-                                            if (item['catatan'] != null &&
-                                                item['catatan']
-                                                    .toString()
-                                                    .isNotEmpty) ...[
-                                              const SizedBox(height: 4),
-                                              Text(
-                                                'Catatan: ${item['catatan']}',
-                                                style: const TextStyle(
-                                                    fontSize: 12,
-                                                    color: Colors.black54),
-                                                maxLines: 1,
-                                                overflow: TextOverflow.ellipsis,
-                                              ),
-                                            ],
-                                            const SizedBox(height: 4),
-                                            Text(
-                                              item['waktu_input'] ?? '-',
-                                              style: const TextStyle(
-                                                  fontSize: 11,
-                                                  color: Colors.black38),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 12),
+                                    ],
                                   ],
                                 ),
-                              );
-                            },
-                          ),
-                        ),
+                              )
+                            : RefreshIndicator(
+                                onRefresh: refreshRiwayat,
+                                color: primaryBlue,
+                                child: ListView.builder(
+                                  controller: _scrollController,
+                                  padding:
+                                      const EdgeInsets.fromLTRB(20, 4, 20, 24),
+                                  itemCount:
+                                      _kunjungan.length + (_hasMore ? 1 : 0),
+                                  itemBuilder: (context, index) {
+                                    if (index == _kunjungan.length) {
+                                      return const Padding(
+                                        padding:
+                                            EdgeInsets.symmetric(vertical: 16),
+                                        child: Center(
+                                          child: CircularProgressIndicator(
+                                              color: primaryBlue,
+                                              strokeWidth: 2),
+                                        ),
+                                      );
+                                    }
+
+                                    final item = _kunjungan[index];
+                                    final status =
+                                        item['status_kunjungan'] as String?;
+                                    final statusColor = _statusColor(status);
+
+                                    return Container(
+                                      margin: const EdgeInsets.only(bottom: 12),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(16),
+                                        border: Border.all(
+                                            color: Colors.grey.shade100),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color:
+                                                Colors.black.withOpacity(0.04),
+                                            blurRadius: 10,
+                                            offset: const Offset(0, 3),
+                                          ),
+                                        ],
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          Container(
+                                            width: 4,
+                                            height: 90,
+                                            decoration: BoxDecoration(
+                                              color: statusColor,
+                                              borderRadius:
+                                                  const BorderRadius.only(
+                                                topLeft: Radius.circular(16),
+                                                bottomLeft: Radius.circular(16),
+                                              ),
+                                            ),
+                                          ),
+                                          const SizedBox(width: 14),
+                                          Container(
+                                            padding: const EdgeInsets.all(10),
+                                            decoration: BoxDecoration(
+                                              color:
+                                                  statusColor.withOpacity(0.1),
+                                              borderRadius:
+                                                  BorderRadius.circular(12),
+                                            ),
+                                            child: Icon(_statusIcon(status),
+                                                color: statusColor, size: 22),
+                                          ),
+                                          const SizedBox(width: 14),
+                                          Expanded(
+                                            child: Padding(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                      vertical: 14),
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    item['nama_bengkel'] ?? '-',
+                                                    style: const TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.w700,
+                                                        fontSize: 15,
+                                                        color: Colors.black87),
+                                                  ),
+                                                  const SizedBox(height: 5),
+                                                  Container(
+                                                    padding: const EdgeInsets
+                                                        .symmetric(
+                                                        horizontal: 8,
+                                                        vertical: 3),
+                                                    decoration: BoxDecoration(
+                                                      color: statusColor
+                                                          .withOpacity(0.1),
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              20),
+                                                    ),
+                                                    child: Text(
+                                                      status ?? '-',
+                                                      style: TextStyle(
+                                                        color: statusColor,
+                                                        fontSize: 11,
+                                                        fontWeight:
+                                                            FontWeight.w600,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  if (item['catatan'] != null &&
+                                                      item['catatan']
+                                                          .toString()
+                                                          .isNotEmpty) ...[
+                                                    const SizedBox(height: 4),
+                                                    Text(
+                                                      'Catatan: ${item['catatan']}',
+                                                      style: const TextStyle(
+                                                          fontSize: 12,
+                                                          color:
+                                                              Colors.black54),
+                                                      maxLines: 1,
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
+                                                    ),
+                                                  ],
+                                                  const SizedBox(height: 4),
+                                                  Text(
+                                                    item['waktu_input'] ?? '-',
+                                                    style: const TextStyle(
+                                                        fontSize: 11,
+                                                        color: Colors.black38),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                          const SizedBox(width: 12),
+                                        ],
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                  ),
+                ],
+              ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

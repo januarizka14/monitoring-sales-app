@@ -101,17 +101,6 @@ class _MainNavigationState extends State<MainNavigation> {
     ];
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Sales Monitoring',
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-        backgroundColor: primaryBlue,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout, color: Colors.white),
-            onPressed: _handleLogout,
-          ),
-        ],
-      ),
       body: IndexedStack(
         index: _selectedIndex,
         children: pages,
