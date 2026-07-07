@@ -54,23 +54,22 @@ monitoring_sales_app/
 │   │   ├── auth_service.dart
 │   │   └── data_service.dart
 │   └── main.dart
-├── backend/
-│   └── api_sales/
-│       ├── koneksi.php
-│       ├── login.php
-│       ├── daftar.php
-│       ├── ambil_dashboard.php
-│       ├── ambil_riwayat.php
-│       ├── ambil_tasks.php
-│       ├── simpan_bengkel.php
-│       ├── selesaikan_task.php
-│       ├── ambil_dashboard_admin.php
-│       ├── ambil_semua_tugas.php
-│       ├── buat_tugas.php
-│       ├── hapus_tugas.php
-│       ├── ambil_semua_kunjungan.php
-│       ├── ambil_semua_users.php
-│       └── hapus_user.php
+├── api_sales/
+│   ├── koneksi.php
+│   ├── login.php
+│   ├── daftar.php
+│   ├── ambil_dashboard.php
+│   ├── ambil_riwayat.php
+│   ├── ambil_tasks.php
+│   ├── simpan_bengkel.php
+│   ├── selesaikan_task.php
+│   ├── ambil_dashboard_admin.php
+│   ├── ambil_semua_tugas.php
+│   ├── buat_tugas.php
+│   ├── hapus_tugas.php
+│   ├── ambil_semua_kunjungan.php
+│   ├── ambil_semua_users.php
+│   └── hapus_user.php
 ├── database/
 │   └── db_sales_bengkel.sql
 └── README.md
@@ -84,7 +83,11 @@ monitoring_sales_app/
 Download dan install XAMPP dari [https://www.apachefriends.org](https://www.apachefriends.org)
 
 ### 2. Copy folder backend
-Copy folder `backend/api_sales` ke dalam folder `htdocs` XAMPP:
+Copy folder `api_sales` dari repo ini ke dalam folder `htdocs` XAMPP:
+
+C:\xampp\htdocs\api_sales\
+
+Pastikan semua file `.php` sudah ada di dalam folder tersebut.
 
 ### 3. Setup Database
 1. Jalankan XAMPP, aktifkan **Apache** dan **MySQL**
@@ -95,10 +98,8 @@ Copy folder `backend/api_sales` ke dalam folder `htdocs` XAMPP:
 6. Klik **Go / Kirim**
 
 ### 4. Buat Akun Admin
-Setelah database di-import, jalankan query ini di phpMyAdmin → tab SQL:
+Setelah database di-import, daftar akun lewat aplikasi dengan username `admin`, lalu jalankan query ini di phpMyAdmin → tab SQL:
 ```sql
--- Daftar dulu lewat aplikasi dengan username "admin"
--- Lalu jalankan query ini untuk set role admin
 UPDATE tb_users SET role = 'admin' WHERE username = 'admin';
 ```
 
@@ -116,7 +117,7 @@ UPDATE tb_users SET role = 'admin' WHERE username = 'admin';
 
 **1. Clone repository**
 ```bash
-git clone https://github.com/USERNAME/monitoring-sales-app.git
+git clone https://github.com/januarizka14/monitoring-sales-app.git
 cd monitoring-sales-app
 ```
 
@@ -127,7 +128,6 @@ flutter pub get
 
 **3. Jalankan app**
 ```bash
-# Pastikan emulator sudah berjalan atau device terhubung
 flutter run
 ```
 
@@ -140,16 +140,16 @@ File: `lib/services/data_service.dart` dan `lib/services/auth_service.dart`
 ```dart
 static String get _baseUrl {
   if (kIsWeb) {
-    return 'http://localhost/api_sales';       // Browser
+    return 'http://localhost/api_sales';
   } else if (Platform.isAndroid) {
-    return 'http://10.0.2.2/api_sales';        // Android Emulator
+    return 'http://10.0.2.2/api_sales';   // Android Emulator
   } else {
-    return 'http://localhost/api_sales';       // iOS / lainnya
+    return 'http://localhost/api_sales';
   }
 }
 ```
 
-> ⚠️ Jika menggunakan **device fisik** (HP asli), ganti `10.0.2.2` dengan **IP lokal laptop** kamu (cek dengan `ipconfig` di Windows atau `ifconfig` di Mac/Linux). Contoh: `http://192.168.1.5/api_sales`
+> ⚠️ Jika menggunakan **device fisik** (HP asli), ganti `10.0.2.2` dengan **IP lokal laptop** kamu. Cek IP dengan perintah `ipconfig` (Windows) atau `ifconfig` (Mac/Linux). Contoh: `http://192.168.1.5/api_sales`
 
 ---
 
@@ -173,7 +173,7 @@ static String get _baseUrl {
 | latitude | VARCHAR(20) | Koordinat GPS |
 | longitude | VARCHAR(20) | Koordinat GPS |
 | catatan | TEXT | Catatan tambahan |
-| status_kunjungan | VARCHAR(20) | Sukses/Follow-up/Tutup/Ditolak |
+| status_kunjungan | VARCHAR(20) | Sukses / Follow-up / Tutup / Ditolak |
 | waktu_input | DATETIME | Waktu kunjungan |
 
 ### `tb_tasks`
@@ -222,11 +222,9 @@ dependencies:
 
 ---
 
-## 👤 Akun Default untuk Testing
+## 👤 Akun untuk Testing
 
-| Role | Username | Password |
-|---|---|---|
-| Admin | admin | *(daftar sendiri, lalu update role)* |
-| Sales | *(daftar lewat app)* | *(sesuai yang didaftarkan)* |
-
----
+| Role | Cara Membuat |
+|---|---|
+| Admin | Daftar lewat app → jalankan query UPDATE role di phpMyAdmin |
+| Sales | Daftar langsung lewat form registrasi di app |
